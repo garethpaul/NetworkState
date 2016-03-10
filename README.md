@@ -1,6 +1,8 @@
 # Network State
 
-Simply add the cocoapod to your pod file
+Simply add the cocoapod to your pod file.
+
+This is great for checking whether your iOS useres are connected to the internet.
 
 ```
 pod 'NetworkState'
