@@ -12,5 +12,5 @@ pod 'NetworkState'
 
 ```
 NetworkState.isConnectedToNetwork()
-// this will return a bool
+// this will return a bool and then you can do as you please
 ```
