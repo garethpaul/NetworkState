@@ -7,12 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F4CF5C71D27575600D58750 /* NetworkStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4CF5C61D27575600D58750 /* NetworkStateTests.swift */; };
+		7F4CF5C91D27575600D58750 /* NetworkState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88C34B691C43621900926501 /* NetworkState.framework */; };
 		880A50A21C4363F3008F6C06 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 880A50A11C4363F3008F6C06 /* SystemConfiguration.framework */; };
 		88C34B6D1C43621900926501 /* NetworkState.h in Headers */ = {isa = PBXBuildFile; fileRef = 88C34B6C1C43621900926501 /* NetworkState.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		88C34B751C43622400926501 /* NetworkState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88C34B741C43622400926501 /* NetworkState.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7F4CF5CA1D27575600D58750 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 88C34B601C43621900926501 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 88C34B681C43621900926501;
+			remoteInfo = NetworkState;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		7F4CF5C41D27575600D58750 /* NetworkStateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NetworkStateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F4CF5C61D27575600D58750 /* NetworkStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStateTests.swift; sourceTree = "<group>"; };
+		7F4CF5C81D27575600D58750 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		880A50A11C4363F3008F6C06 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		88C34B691C43621900926501 /* NetworkState.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NetworkState.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		88C34B6C1C43621900926501 /* NetworkState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NetworkState.h; sourceTree = "<group>"; };
@@ -21,6 +36,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7F4CF5C11D27575600D58750 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F4CF5C91D27575600D58750 /* NetworkState.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		88C34B651C43621900926501 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -32,11 +55,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7F4CF5C51D27575600D58750 /* NetworkStateTests */ = {
+			isa = PBXGroup;
+			children = (
+				7F4CF5C61D27575600D58750 /* NetworkStateTests.swift */,
+				7F4CF5C81D27575600D58750 /* Info.plist */,
+			);
+			path = NetworkStateTests;
+			sourceTree = "<group>";
+		};
 		88C34B5F1C43621900926501 = {
 			isa = PBXGroup;
 			children = (
 				880A50A11C4363F3008F6C06 /* SystemConfiguration.framework */,
 				88C34B6B1C43621900926501 /* NetworkState */,
+				7F4CF5C51D27575600D58750 /* NetworkStateTests */,
 				88C34B6A1C43621900926501 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				88C34B691C43621900926501 /* NetworkState.framework */,
+				7F4CF5C41D27575600D58750 /* NetworkStateTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,6 +107,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		7F4CF5C31D27575600D58750 /* NetworkStateTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7F4CF5CC1D27575600D58750 /* Build configuration list for PBXNativeTarget "NetworkStateTests" */;
+			buildPhases = (
+				7F4CF5C01D27575600D58750 /* Sources */,
+				7F4CF5C11D27575600D58750 /* Frameworks */,
+				7F4CF5C21D27575600D58750 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7F4CF5CB1D27575600D58750 /* PBXTargetDependency */,
+			);
+			name = NetworkStateTests;
+			productName = NetworkStateTests;
+			productReference = 7F4CF5C41D27575600D58750 /* NetworkStateTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		88C34B681C43621900926501 /* NetworkState */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 88C34B711C43621900926501 /* Build configuration list for PBXNativeTarget "NetworkState" */;
@@ -97,9 +149,13 @@
 		88C34B601C43621900926501 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = GPJ;
 				TargetAttributes = {
+					7F4CF5C31D27575600D58750 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
 					88C34B681C43621900926501 = {
 						CreatedOnToolsVersion = 7.2;
 					};
@@ -118,11 +174,19 @@
 			projectRoot = "";
 			targets = (
 				88C34B681C43621900926501 /* NetworkState */,
+				7F4CF5C31D27575600D58750 /* NetworkStateTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7F4CF5C21D27575600D58750 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		88C34B671C43621900926501 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -133,6 +197,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7F4CF5C01D27575600D58750 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F4CF5C71D27575600D58750 /* NetworkStateTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		88C34B641C43621900926501 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -143,7 +215,39 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		7F4CF5CB1D27575600D58750 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 88C34B681C43621900926501 /* NetworkState */;
+			targetProxy = 7F4CF5CA1D27575600D58750 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		7F4CF5CD1D27575600D58750 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				INFOPLIST_FILE = NetworkStateTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpj.NetworkStateTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		7F4CF5CE1D27575600D58750 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				INFOPLIST_FILE = NetworkStateTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpj.NetworkStateTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		88C34B6F1C43621900926501 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -275,6 +379,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		7F4CF5CC1D27575600D58750 /* Build configuration list for PBXNativeTarget "NetworkStateTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7F4CF5CD1D27575600D58750 /* Debug */,
+				7F4CF5CE1D27575600D58750 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		88C34B631C43621900926501 /* Build configuration list for PBXProject "NetworkState" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
