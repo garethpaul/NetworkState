@@ -76,4 +76,4 @@ Keep changes small and tied to the project that is already present in this repos
 
 Prior README summary:
 
-> [![Build Status](https://travis-ci.org/garethpaul/NetworkState.svg?branch=master)](https://travis-ci.org/garethpaul/NetworkState) Network State <!-- README-OVERVIEW-IMAGE --> Simply add the cocoapod to your pod file Usage
+> [![Build Status](https://travis-ci.org/garethpaul/NetworkState.svg?branch=master)](https://travis-ci.org/garethpaul/NetworkState) Network State Simply add the cocoapod to your pod file Usage
