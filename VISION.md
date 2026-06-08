@@ -1,5 +1,8 @@
 ## Network State Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 Network State is a small iOS library that exposes a simple connectivity check
 through `NetworkState.isConnectedToNetwork()`.
 
