@@ -2,6 +2,9 @@
 
 # Network State
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 Simply add the cocoapod to your pod file
 
 ```
