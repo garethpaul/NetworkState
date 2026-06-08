@@ -5,24 +5,30 @@
 
 ## Overview
 
-`garethpaul/NetworkState` is an Apple platform application or Objective-C/Swift sample. SDK for Reachability
+`garethpaul/NetworkState` is a small Swift framework that wraps
+SystemConfiguration reachability as `NetworkState.isConnectedToNetwork()`.
 
 This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: Swift (2), C/C++ headers (1), shell (1).
 
 ## Repository Contents
 
 - `README.md` - project overview and local usage notes
-- `build.sh`
-- `NetworkState` - source or example code
+- `build.sh` - Xcode build/test runner with environment overrides
+- `CHANGES.md` - baseline change log
+- `Makefile` - host-portable static verification entry point
+- `NetworkState` - Swift reachability framework source
 - `NetworkState.xcodeproj` - Xcode project file
-- `NetworkStateTests` - source or example code
+- `NetworkState.podspec` - CocoaPods package metadata
+- `NetworkStateTests` - XCTest smoke coverage for the public API
 - `SECURITY.md` - security reporting and disclosure guidance
 - `VISION.md` - project direction and maintenance guardrails
+- `docs/plans/2026-06-08-network-state-baseline.md` - completed hardening plan
+- `scripts/check-baseline.py` - static baseline checks used by `make check`
 
 Additional scan context:
 
 - Source directories: NetworkState, NetworkStateTests
-- Dependency and build manifests: none detected
+- Dependency and build manifests: `NetworkState.podspec`, `.travis.yml`
 - Entry points or build surfaces: build.sh, NetworkState.xcodeproj
 - Test-looking files: NetworkStateTests/Info.plist, NetworkStateTests/NetworkStateTests.swift
 
@@ -32,39 +38,52 @@ Additional scan context:
 
 - Git
 - macOS with Xcode for building Apple platform projects
+- Python 3 for static checks
+- CocoaPods when validating the podspec with `pod spec lint`
 
 ### Setup
 
 ```bash
 git clone https://github.com/garethpaul/NetworkState.git
 cd NetworkState
+make check
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
 ## Running or Using the Project
 
-- Open `NetworkState.xcodeproj` in Xcode, choose the app or sample scheme, and run it on the matching simulator/device.
-- Run `./build.sh` when the required platform toolchain is installed.
+- Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.
+- Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
+- Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
+
+```bash
+DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
+```
 
 ## Testing and Verification
 
-- Xcode's test action or `xcodebuild test` with the appropriate scheme and destination
+- `make check`
+- `./build.sh` on macOS with Xcode
+- `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
 ## Configuration and Secrets
 
-- No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
+- No required secret or credential file was identified in the repository scan.
+- Keep signing identities, local xcconfig files, environment files, and generated build output out of git.
 
 ## Security and Privacy Notes
 
-- Review changes touching network requests, sockets, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
+- The library uses `SystemConfiguration` reachability and should keep checks local to the device.
+- Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 
 ## Maintenance Notes
 
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
+- Run `make check` before pushing changes, then run Xcode and CocoaPods verification on macOS when package metadata or Swift behavior changes.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

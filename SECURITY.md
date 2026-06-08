@@ -25,9 +25,10 @@ Helpful reports include:
 ## Project Security Posture
 
 - This repository appears to be an Apple platform application or Swift sample. The active security scope is the code and documentation on the default branch.
+- The core code uses `SystemConfiguration` reachability. Connectivity checks should remain local to the device and should not collect telemetry, browsing data, endpoint history, or packet contents.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
-- No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
+- CocoaPods metadata lives in `NetworkState.podspec`. Run `make check` and `pod spec lint NetworkState.podspec` before publishing package metadata changes.
 
 ## Mobile Privacy Notes
 
@@ -36,6 +37,8 @@ If this project requests device permissions such as location, camera, microphone
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
+
+For this repository, keep signing identities, local xcconfig files, `.env` files, and generated build products out of git.
 
 ## Safe Research Guidelines
 

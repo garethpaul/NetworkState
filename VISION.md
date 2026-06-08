@@ -16,10 +16,11 @@ The current focus is:
 
 Priority:
 
-- Preserve the boolean connectivity API
+- Preserve the public boolean connectivity API
 - Keep podspec, Xcode project, and README usage aligned
 - Maintain test coverage for the helper behavior
 - Avoid growing the library beyond focused reachability utilities
+- Keep `SystemConfiguration` checks local to the device
 
 Next priorities:
 
@@ -27,12 +28,13 @@ Next priorities:
 - Modernize Swift/project settings in a dedicated pass
 - Add tests for offline, online, and constrained network cases where practical
 - Clarify package-manager support if revived
+- Run `pod spec lint NetworkState.podspec` on macOS before any package release
 
 Contribution rules:
 
 - One PR = one focused API, test, package, or documentation change.
 - Keep the library lightweight.
-- Run the build script or Xcode tests before pushing behavior changes.
+- Run `make check` and the build script or Xcode tests before pushing behavior changes.
 - Preserve API compatibility for consumers where possible.
 
 ## Security

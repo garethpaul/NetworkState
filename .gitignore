@@ -4,7 +4,7 @@
 
 ## Build generated
 build/
-DerivedData
+DerivedData/
 
 ## Various settings
 *.pbxuser
@@ -16,6 +16,10 @@ DerivedData
 *.perspectivev3
 !default.perspectivev3
 xcuserdata
+*.local.xcconfig
+*.secrets.xcconfig
+.env
+.env.*
 
 ## Other
 *.xccheckout
