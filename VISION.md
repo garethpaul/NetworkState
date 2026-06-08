@@ -34,6 +34,11 @@ Contribution rules:
 
 ## Security
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 Connectivity checks should not collect browsing or network traffic data. Future
 changes should avoid telemetry and keep behavior local to the device.
 
