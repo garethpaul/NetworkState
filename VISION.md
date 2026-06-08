@@ -43,3 +43,6 @@ changes should avoid telemetry and keep behavior local to the device.
 - Broad networking frameworks unrelated to connectivity state
 - API-breaking changes without migration notes
 - Package metadata changes without verification
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
