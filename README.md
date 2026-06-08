@@ -71,9 +71,3 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Contributing
 
 Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
-
-## Existing Project Notes
-
-Prior README summary:
-
-> [![Build Status](https://travis-ci.org/garethpaul/NetworkState.svg?branch=master)](https://travis-ci.org/garethpaul/NetworkState) Network State Simply add the cocoapod to your pod file Usage
