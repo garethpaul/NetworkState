@@ -37,7 +37,7 @@ Contribution rules:
 Connectivity checks should not collect browsing or network traffic data. Future
 changes should avoid telemetry and keep behavior local to the device.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Network telemetry or analytics
 - Broad networking frameworks unrelated to connectivity state
