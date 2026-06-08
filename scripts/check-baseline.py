@@ -42,7 +42,7 @@ def main() -> int:
     swift = read("NetworkState/NetworkState.swift")
     if "public class func isConnectedToNetwork() -> Bool" not in swift:
         failures.append("isConnectedToNetwork must be public for framework consumers")
-    if "guard let defaultRouteReachability" not in swift:
+    if "guard let reachability = defaultRouteReachability" not in swift:
         failures.append("reachability creation must be guarded")
     if "defaultRouteReachability!" in swift:
         failures.append("reachability must not be force-unwrapped")
@@ -74,7 +74,17 @@ def main() -> int:
         failures.append(".travis.yml must run static checks before the Xcode build")
 
     gitignore = read(".gitignore")
-    for expected in ["DerivedData/", "*.local.xcconfig", "*.secrets.xcconfig", ".env"]:
+    for expected in [
+        "DerivedData/",
+        "*.local.xcconfig",
+        "*.secrets.xcconfig",
+        "*.mobileprovision",
+        "*.p12",
+        "*.cer",
+        "*.p8",
+        ".xcode.env.local",
+        ".env",
+    ]:
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 

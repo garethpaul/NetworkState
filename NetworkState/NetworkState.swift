@@ -14,14 +14,16 @@ public class NetworkState {
         zeroAddress.sin_len = UInt8(sizeofValue(zeroAddress))
         zeroAddress.sin_family = sa_family_t(AF_INET)
 
-        guard let defaultRouteReachability = withUnsafePointer(&zeroAddress, {
+        let defaultRouteReachability = withUnsafePointer(&zeroAddress) {
             SCNetworkReachabilityCreateWithAddress(nil, UnsafePointer($0))
-        }) else {
+        }
+
+        guard let reachability = defaultRouteReachability else {
             return false
         }
 
         var flags = SCNetworkReachabilityFlags()
-        if !SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags) {
+        if !SCNetworkReachabilityGetFlags(reachability, &flags) {
             return false
         }
         let isReachable = (flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0
