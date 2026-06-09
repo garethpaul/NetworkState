@@ -19,6 +19,7 @@ Priority:
 - Preserve the public boolean connectivity API
 - Keep podspec, Xcode project, and README usage aligned
 - Maintain test coverage for the helper behavior
+- Keep reachability flag evaluation covered by deterministic tests
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
@@ -38,6 +39,7 @@ Contribution rules:
 - Keep the library lightweight.
 - Run `make check` and the build script or Xcode tests before pushing behavior changes.
 - Preserve API compatibility for consumers where possible.
+- Preserve reachability flag evaluation coverage when changing SystemConfiguration logic.
 
 ## Security
 

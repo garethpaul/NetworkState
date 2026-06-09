@@ -54,6 +54,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Running or Using the Project
 
 - Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.
+- `NetworkState.isReachableWithFlags(_:)` keeps reachability flag evaluation testable for fixture-style checks.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
@@ -68,6 +69,7 @@ DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
 - `make check`
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
+- XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -79,6 +81,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Security and Privacy Notes
 
 - The library uses `SystemConfiguration` reachability and should keep checks local to the device.
+- Reachability flag evaluation should remain covered by fixture-style tests rather than relying only on live network state.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 

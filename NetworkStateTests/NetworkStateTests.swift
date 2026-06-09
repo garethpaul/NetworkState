@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import SystemConfiguration
 import NetworkState
 
 class NetworkStateTests: XCTestCase {
@@ -14,6 +15,15 @@ class NetworkStateTests: XCTestCase {
     func testConnectivityCheckReturnsBoolean() {
         let result = NetworkState.isConnectedToNetwork()
         XCTAssertTrue(result || !result)
+    }
+
+    func testReachabilityFlagEvaluation() {
+        let reachable = UInt32(kSCNetworkFlagsReachable)
+        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
+
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable)))
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired)))
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: 0)))
     }
 
 }

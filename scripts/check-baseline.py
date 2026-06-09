@@ -26,6 +26,7 @@ REQUIRED = [
     "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme",
     "docs/plans/2026-06-08-network-state-baseline.md",
     "docs/plans/2026-06-09-unsigned-build-default.md",
+    "docs/plans/2026-06-09-reachability-flag-evaluation.md",
     "docs/readme-overview.svg",
 ]
 
@@ -47,12 +48,18 @@ def main() -> int:
         failures.append("reachability creation must be guarded")
     if "defaultRouteReachability!" in swift:
         failures.append("reachability must not be force-unwrapped")
+    if "public class func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool" not in swift:
+        failures.append("reachability flag evaluation must be exposed for fixture tests")
+    if "return isReachableWithFlags(flags)" not in swift:
+        failures.append("isConnectedToNetwork must use the shared flag evaluator")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
         failures.append("tests must import the framework module")
     if "NetworkState.isConnectedToNetwork()" not in tests:
         failures.append("tests must exercise the public connectivity API")
+    if "testReachabilityFlagEvaluation" not in tests or "isReachableWithFlags" not in tests:
+        failures.append("tests must cover reachability flag evaluation")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -90,7 +97,7 @@ def main() -> int:
             failures.append(f".gitignore must include {expected}")
 
     docs = read("README.md") + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
-    for phrase in ["make check", "pod spec lint", "SystemConfiguration", "local to the device"]:
+    for phrase in ["make check", "pod spec lint", "SystemConfiguration", "local to the device", "reachability flag"]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
 
@@ -100,6 +107,9 @@ def main() -> int:
     unsigned_plan = read("docs/plans/2026-06-09-unsigned-build-default.md")
     if "status: completed" not in unsigned_plan or "CODE_SIGNING_ALLOWED" not in unsigned_plan:
         failures.append("unsigned build plan must record status and signing verification")
+    flag_plan = read("docs/plans/2026-06-09-reachability-flag-evaluation.md")
+    if "status: completed" not in flag_plan or "make check" not in flag_plan:
+        failures.append("reachability flag evaluation plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:
