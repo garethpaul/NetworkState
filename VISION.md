@@ -22,6 +22,7 @@ Priority:
 - Keep reachability flag evaluation covered by deterministic tests
 - Keep automatic connection reachability flags covered without live network state
 - Keep automatic connection behavior constrained so it requires the reachable flag
+- Keep the intervention-required flag from reporting connectivity
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
@@ -45,6 +46,7 @@ Contribution rules:
 - Preserve reachability flag evaluation coverage when changing SystemConfiguration logic.
 - Preserve automatic connection handling when changing reachability flags.
 - Preserve the reachable flag requirement for automatic connection cases.
+- Preserve intervention-required flag handling when changing reachability logic.
 - Preserve deployment target alignment when changing package metadata.
 
 ## Security

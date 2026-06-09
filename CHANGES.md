@@ -10,6 +10,8 @@
 - Added deterministic reachability flag evaluation coverage for reachable, connection-required, and unreachable states.
 - Treated automatic connection reachability flags as reachable when no user intervention is required.
 - Covered automatic connection flag combinations that still require the reachable flag.
+- Rejected intervention-required flag combinations so user-action states do not
+  report connectivity.
 - Aligned Xcode deployment targets with the podspec's iOS 8.0 support claim.
 - Replaced placeholder XCTest methods with a smoke test for the public connectivity API.
 - Parameterized `build.sh` with `PROJECT`, `SCHEME`, `DESTINATION`, and `SDK` environment overrides.

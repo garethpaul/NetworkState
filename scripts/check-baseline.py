@@ -30,6 +30,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-automatic-reachability-flags.md",
     "docs/plans/2026-06-09-automatic-reachable-flag.md",
     "docs/plans/2026-06-09-podspec-deployment-target-alignment.md",
+    "docs/plans/2026-06-09-intervention-required-flag.md",
     "docs/readme-overview.svg",
 ]
 
@@ -65,6 +66,8 @@ def main() -> int:
             failures.append(f"reachability flag evaluation must handle {phrase}")
     if "return isReachable &&" not in swift:
         failures.append("automatic reachability handling must still require the reachable flag")
+    if "return isReachable && !interventionRequired" not in swift:
+        failures.append("reachability evaluation must reject intervention-required states")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
@@ -77,6 +80,8 @@ def main() -> int:
         failures.append("tests must cover automatic reachability connection flags")
     if "testAutomaticConnectionStillRequiresReachableFlag" not in tests:
         failures.append("tests must cover automatic connection flags without the reachable flag")
+    if "testInterventionRequiredFlagPreventsReachability" not in tests:
+        failures.append("tests must cover intervention-required reachability flags")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -131,6 +136,7 @@ def main() -> int:
         "reachability flag",
         "automatic connection",
         "requires the reachable flag",
+        "intervention-required flag",
         "iOS 8.0",
     ]:
         if phrase not in docs:
@@ -157,6 +163,10 @@ def main() -> int:
     deployment_plan = deployment_plan_path.read_text(encoding="utf-8") if deployment_plan_path.exists() else ""
     if "status: completed" not in deployment_plan or "make check" not in deployment_plan:
         failures.append("deployment target alignment plan must record status and verification")
+    intervention_plan_path = ROOT / "docs/plans/2026-06-09-intervention-required-flag.md"
+    intervention_plan = intervention_plan_path.read_text(encoding="utf-8") if intervention_plan_path.exists() else ""
+    if "status: completed" not in intervention_plan or "make check" not in intervention_plan:
+        failures.append("intervention-required flag plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

@@ -47,4 +47,11 @@ class NetworkStateTests: XCTestCase {
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: connectionRequired | connectionOnTraffic)))
     }
 
+    func testInterventionRequiredFlagPreventsReachability() {
+        let reachable = UInt32(kSCNetworkFlagsReachable)
+        let interventionRequired = UInt32(kSCNetworkFlagsInterventionRequired)
+
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
+    }
+
 }
