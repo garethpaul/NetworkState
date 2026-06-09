@@ -29,6 +29,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-reachability-flag-evaluation.md",
     "docs/plans/2026-06-09-automatic-reachability-flags.md",
     "docs/plans/2026-06-09-automatic-reachable-flag.md",
+    "docs/plans/2026-06-09-podspec-deployment-target-alignment.md",
     "docs/readme-overview.svg",
 ]
 
@@ -90,8 +91,17 @@ def main() -> int:
     for phrase in ['s.framework  = "SystemConfiguration"', 's.source_files = "NetworkState/*.{swift}"', 's.social_media_url   = "https://twitter.com/gpj"']:
         if phrase not in podspec:
             failures.append(f"podspec must include {phrase}")
+    if 's.platform     = :ios, "8.0"' not in podspec:
+        failures.append("podspec must declare the maintained iOS 8.0 deployment target")
     if "http://twitter.com" in podspec or "http://docs.cocoapods.org" in podspec:
         failures.append("podspec metadata should use HTTPS URLs")
+
+    project = read("NetworkState.xcodeproj/project.pbxproj")
+    if project.count("IPHONEOS_DEPLOYMENT_TARGET = 8.0;") < 4:
+        failures.append("Xcode project deployment targets must align with the podspec's iOS 8.0 support")
+    for stale_target in ["IPHONEOS_DEPLOYMENT_TARGET = 9.2;", "IPHONEOS_DEPLOYMENT_TARGET = 9.3;"]:
+        if stale_target in project:
+            failures.append(f"Xcode project must not retain stale deployment target {stale_target}")
 
     travis = read(".travis.yml")
     if "- make check" not in travis or "- ./build.sh" not in travis:
@@ -121,6 +131,7 @@ def main() -> int:
         "reachability flag",
         "automatic connection",
         "requires the reachable flag",
+        "iOS 8.0",
     ]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
@@ -142,6 +153,10 @@ def main() -> int:
     reachable_plan = reachable_plan_path.read_text(encoding="utf-8") if reachable_plan_path.exists() else ""
     if "status: completed" not in reachable_plan or "make check" not in reachable_plan:
         failures.append("automatic reachable flag plan must record status and verification")
+    deployment_plan_path = ROOT / "docs/plans/2026-06-09-podspec-deployment-target-alignment.md"
+    deployment_plan = deployment_plan_path.read_text(encoding="utf-8") if deployment_plan_path.exists() else ""
+    if "status: completed" not in deployment_plan or "make check" not in deployment_plan:
+        failures.append("deployment target alignment plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

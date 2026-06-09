@@ -61,6 +61,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
+- The Xcode project deployment targets align with the podspec's declared iOS 8.0 support.
 
 ```bash
 DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
@@ -93,6 +94,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
 - Run `make check` before pushing changes, then run Xcode and CocoaPods verification on macOS when package metadata or Swift behavior changes.
+- Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

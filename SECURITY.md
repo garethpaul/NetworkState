@@ -32,6 +32,7 @@ Helpful reports include:
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - CocoaPods metadata lives in `NetworkState.podspec`. Run `make check` and `pod spec lint NetworkState.podspec` before publishing package metadata changes.
+- The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
 
 ## Mobile Privacy Notes
 

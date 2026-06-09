@@ -26,6 +26,7 @@ Priority:
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
   default
+- Keep Xcode deployment targets aligned with the podspec's iOS 8.0 support
 
 Next priorities:
 
@@ -44,6 +45,7 @@ Contribution rules:
 - Preserve reachability flag evaluation coverage when changing SystemConfiguration logic.
 - Preserve automatic connection handling when changing reachability flags.
 - Preserve the reachable flag requirement for automatic connection cases.
+- Preserve deployment target alignment when changing package metadata.
 
 ## Security
 
