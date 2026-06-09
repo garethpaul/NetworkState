@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-09
+
+- Added `make lint`, `make test`, and `make build` aliases so standard local
+  gates run the same SDK-free static baseline as `make check`.
+
 ## 2026-06-08
 
 - Defaulted the Xcode build script to unsigned simulator validation through

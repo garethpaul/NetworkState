@@ -31,6 +31,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-automatic-reachable-flag.md",
     "docs/plans/2026-06-09-podspec-deployment-target-alignment.md",
     "docs/plans/2026-06-09-intervention-required-flag.md",
+    "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/readme-overview.svg",
 ]
 
@@ -92,6 +93,15 @@ def main() -> int:
     if "function " in build:
         failures.append("build.sh must use POSIX shell function syntax or no shell functions")
 
+    makefile = read("Makefile")
+    for phrase in [
+        ".PHONY: build check lint static-check test verify",
+        "check: verify",
+        "lint test build verify: static-check",
+    ]:
+        if phrase not in makefile:
+            failures.append(f"Makefile must include standard gate alias: {phrase}")
+
     podspec = read("NetworkState.podspec")
     for phrase in ['s.framework  = "SystemConfiguration"', 's.source_files = "NetworkState/*.{swift}"', 's.social_media_url   = "https://twitter.com/gpj"']:
         if phrase not in podspec:
@@ -138,6 +148,9 @@ def main() -> int:
         "requires the reachable flag",
         "intervention-required flag",
         "iOS 8.0",
+        "make lint",
+        "make test",
+        "make build",
     ]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
@@ -167,6 +180,10 @@ def main() -> int:
     intervention_plan = intervention_plan_path.read_text(encoding="utf-8") if intervention_plan_path.exists() else ""
     if "status: completed" not in intervention_plan or "make check" not in intervention_plan:
         failures.append("intervention-required flag plan must record status and verification")
+    make_gate_plan_path = ROOT / "docs/plans/2026-06-09-make-gate-aliases.md"
+    make_gate_plan = make_gate_plan_path.read_text(encoding="utf-8") if make_gate_plan_path.exists() else ""
+    if "status: completed" not in make_gate_plan or "make check" not in make_gate_plan:
+        failures.append("Make gate alias plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

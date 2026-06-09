@@ -28,6 +28,8 @@ Priority:
 - Keep simulator verification independent of local signing identities by
   default
 - Keep Xcode deployment targets aligned with the podspec's iOS 8.0 support
+- Keep `make lint`, `make test`, `make build`, and `make check` wired to the
+  SDK-free static baseline
 
 Next priorities:
 
@@ -41,7 +43,8 @@ Contribution rules:
 
 - One PR = one focused API, test, package, or documentation change.
 - Keep the library lightweight.
-- Run `make check` and the build script or Xcode tests before pushing behavior changes.
+- Run `make lint`, `make test`, `make build`, `make check`, and the build
+  script or Xcode tests before pushing behavior changes.
 - Preserve API compatibility for consumers where possible.
 - Preserve reachability flag evaluation coverage when changing SystemConfiguration logic.
 - Preserve automatic connection handling when changing reachability flags.

@@ -46,6 +46,9 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/NetworkState.git
 cd NetworkState
+make lint
+make test
+make build
 make check
 ```
 
@@ -71,10 +74,17 @@ DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
 
 ## Testing and Verification
 
+- `make lint`
+- `make test`
+- `make build`
 - `make check`
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 - XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.
+
+The Make targets run the same SDK-free static baseline on non-macOS hosts. Use
+`./build.sh` or Xcode for the full framework test run when the legacy toolchain
+is available.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -97,8 +107,12 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Maintenance Notes
 
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
-- Run `make check` before pushing changes, then run Xcode and CocoaPods verification on macOS when package metadata or Swift behavior changes.
+- Run `make lint`, `make test`, `make build`, and `make check` before pushing
+  changes, then run Xcode and CocoaPods verification on macOS when package
+  metadata or Swift behavior changes.
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
+- See `docs/plans/2026-06-09-make-gate-aliases.md` for the standard local gate
+  aliases.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 
