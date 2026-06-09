@@ -6,6 +6,8 @@
   gates run the same SDK-free static baseline as `make check`.
 - Aligned the framework Info.plist version with the podspec's `0.0.2` release
   metadata.
+- Added combined automatic connection flags coverage so reachable on-demand and
+  on-traffic states stay accepted together.
 
 ## 2026-06-08
 

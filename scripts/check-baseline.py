@@ -34,6 +34,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-intervention-required-flag.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-09-framework-version-alignment.md",
+    "docs/plans/2026-06-09-combined-automatic-flags.md",
     "docs/readme-overview.svg",
 ]
 
@@ -83,6 +84,8 @@ def main() -> int:
         failures.append("tests must cover automatic reachability connection flags")
     if "testAutomaticConnectionStillRequiresReachableFlag" not in tests:
         failures.append("tests must cover automatic connection flags without the reachable flag")
+    if "testCombinedAutomaticConnectionFlagsAreReachable" not in tests:
+        failures.append("tests must cover combined automatic connection reachability flags")
     if "testInterventionRequiredFlagPreventsReachability" not in tests:
         failures.append("tests must cover intervention-required reachability flags")
     if "testExample" in tests or "testPerformanceExample" in tests:
@@ -152,6 +155,7 @@ def main() -> int:
         "reachability flag",
         "automatic connection",
         "requires the reachable flag",
+        "combined automatic connection flags",
         "intervention-required flag",
         "iOS 8.0",
         "framework version alignment",
@@ -195,6 +199,10 @@ def main() -> int:
     framework_version_plan = framework_version_plan_path.read_text(encoding="utf-8") if framework_version_plan_path.exists() else ""
     if "status: completed" not in framework_version_plan or "make check" not in framework_version_plan:
         failures.append("framework version alignment plan must record status and verification")
+    combined_flags_plan_path = ROOT / "docs/plans/2026-06-09-combined-automatic-flags.md"
+    combined_flags_plan = combined_flags_plan_path.read_text(encoding="utf-8") if combined_flags_plan_path.exists() else ""
+    if "status: completed" not in combined_flags_plan or "make check" not in combined_flags_plan:
+        failures.append("combined automatic connection flag plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

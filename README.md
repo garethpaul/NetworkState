@@ -60,6 +60,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `NetworkState.isReachableWithFlags(_:)` keeps reachability flag evaluation testable for fixture-style checks.
 - Automatic connection reachability flags are considered reachable when no user intervention is required.
 - Automatic connection handling still requires the reachable flag, so connection-on-demand flags alone do not report connectivity.
+- Combined automatic connection flags remain reachable when the base reachable
+  flag is present and no user intervention is required.
 - The intervention-required flag prevents reachability even when the base
   reachable flag is present.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
@@ -101,6 +103,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Reachability flag evaluation should remain covered by fixture-style tests rather than relying only on live network state.
 - Automatic connection reachability flags should stay covered so connection-on-demand paths do not report false negatives.
 - Automatic connection behavior should keep the rule that it requires the reachable flag.
+- Combined automatic connection flags should stay covered so on-demand and
+  on-traffic states remain accepted together.
 - The intervention-required flag should keep user-action states from reporting
   connected.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
@@ -115,6 +119,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
 - Keep framework version alignment between `NetworkState/Info.plist` and
   `NetworkState.podspec` before publishing package metadata.
+- Keep combined automatic connection flags covered in fixture-style tests before
+  changing reachability evaluation.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the standard local gate
   aliases.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

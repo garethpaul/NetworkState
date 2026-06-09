@@ -29,6 +29,8 @@ Helpful reports include:
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.
+- Combined automatic connection flags should stay covered so on-demand and
+  on-traffic states remain accepted together when reachable.
 - The intervention-required flag should prevent connectivity from being
   reported when the network state still needs user action.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
