@@ -21,6 +21,8 @@ Priority:
 - Maintain test coverage for the helper behavior
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
+- Keep simulator verification independent of local signing identities by
+  default
 
 Next priorities:
 

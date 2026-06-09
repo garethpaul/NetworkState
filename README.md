@@ -56,6 +56,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
+- The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
+  override it only when intentionally testing signing behavior.
 
 ```bash
 DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh

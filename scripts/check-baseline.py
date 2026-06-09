@@ -25,6 +25,7 @@ REQUIRED = [
     "NetworkState.xcodeproj/project.pbxproj",
     "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme",
     "docs/plans/2026-06-08-network-state-baseline.md",
+    "docs/plans/2026-06-09-unsigned-build-default.md",
     "docs/readme-overview.svg",
 ]
 
@@ -56,7 +57,7 @@ def main() -> int:
         failures.append("placeholder XCTest methods must be replaced")
 
     build = read("build.sh")
-    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "command -v xcodebuild"]:
+    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
         if phrase not in build:
             failures.append(f"build.sh must include {phrase}")
     if "function " in build:
@@ -96,6 +97,9 @@ def main() -> int:
     plan = read("docs/plans/2026-06-08-network-state-baseline.md")
     if "status: completed" not in plan or "make check" not in plan:
         failures.append("completed plan must record status and verification")
+    unsigned_plan = read("docs/plans/2026-06-09-unsigned-build-default.md")
+    if "status: completed" not in unsigned_plan or "CODE_SIGNING_ALLOWED" not in unsigned_plan:
+        failures.append("unsigned build plan must record status and signing verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:
