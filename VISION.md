@@ -21,6 +21,7 @@ Priority:
 - Maintain test coverage for the helper behavior
 - Keep reachability flag evaluation covered by deterministic tests
 - Keep automatic connection reachability flags covered without live network state
+- Keep automatic connection behavior constrained so it requires the reachable flag
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
@@ -42,6 +43,7 @@ Contribution rules:
 - Preserve API compatibility for consumers where possible.
 - Preserve reachability flag evaluation coverage when changing SystemConfiguration logic.
 - Preserve automatic connection handling when changing reachability flags.
+- Preserve the reachable flag requirement for automatic connection cases.
 
 ## Security
 

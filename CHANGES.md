@@ -9,6 +9,7 @@
 - Guarded reachability creation so an unexpected `SCNetworkReachabilityCreateWithAddress` failure returns `false` instead of crashing.
 - Added deterministic reachability flag evaluation coverage for reachable, connection-required, and unreachable states.
 - Treated automatic connection reachability flags as reachable when no user intervention is required.
+- Covered automatic connection flag combinations that still require the reachable flag.
 - Replaced placeholder XCTest methods with a smoke test for the public connectivity API.
 - Parameterized `build.sh` with `PROJECT`, `SCHEME`, `DESTINATION`, and `SDK` environment overrides.
 - Updated CocoaPods metadata URLs to HTTPS and documented `pod spec lint` verification.

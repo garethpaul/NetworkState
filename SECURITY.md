@@ -28,6 +28,7 @@ Helpful reports include:
 - The core code uses `SystemConfiguration` reachability. Connectivity checks should remain local to the device and should not collect telemetry, browsing data, endpoint history, or packet contents.
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
+- Automatic connection handling should still require the reachable flag before reporting connectivity.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - CocoaPods metadata lives in `NetworkState.podspec`. Run `make check` and `pod spec lint NetworkState.podspec` before publishing package metadata changes.
