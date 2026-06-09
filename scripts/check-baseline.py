@@ -27,6 +27,7 @@ REQUIRED = [
     "docs/plans/2026-06-08-network-state-baseline.md",
     "docs/plans/2026-06-09-unsigned-build-default.md",
     "docs/plans/2026-06-09-reachability-flag-evaluation.md",
+    "docs/plans/2026-06-09-automatic-reachability-flags.md",
     "docs/readme-overview.svg",
 ]
 
@@ -52,6 +53,14 @@ def main() -> int:
         failures.append("reachability flag evaluation must be exposed for fixture tests")
     if "return isReachableWithFlags(flags)" not in swift:
         failures.append("isConnectedToNetwork must use the shared flag evaluator")
+    for phrase in [
+        "canConnectAutomatically",
+        "kSCNetworkFlagsConnectionOnDemand",
+        "kSCNetworkFlagsConnectionOnTraffic",
+        "kSCNetworkFlagsInterventionRequired",
+    ]:
+        if phrase not in swift:
+            failures.append(f"reachability flag evaluation must handle {phrase}")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
@@ -60,6 +69,8 @@ def main() -> int:
         failures.append("tests must exercise the public connectivity API")
     if "testReachabilityFlagEvaluation" not in tests or "isReachableWithFlags" not in tests:
         failures.append("tests must cover reachability flag evaluation")
+    if "testReachabilityFlagEvaluationAllowsAutomaticConnection" not in tests:
+        failures.append("tests must cover automatic reachability connection flags")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -97,7 +108,7 @@ def main() -> int:
             failures.append(f".gitignore must include {expected}")
 
     docs = read("README.md") + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
-    for phrase in ["make check", "pod spec lint", "SystemConfiguration", "local to the device", "reachability flag"]:
+    for phrase in ["make check", "pod spec lint", "SystemConfiguration", "local to the device", "reachability flag", "automatic connection"]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
 
@@ -110,6 +121,10 @@ def main() -> int:
     flag_plan = read("docs/plans/2026-06-09-reachability-flag-evaluation.md")
     if "status: completed" not in flag_plan or "make check" not in flag_plan:
         failures.append("reachability flag evaluation plan must record status and verification")
+    automatic_plan_path = ROOT / "docs/plans/2026-06-09-automatic-reachability-flags.md"
+    automatic_plan = automatic_plan_path.read_text(encoding="utf-8") if automatic_plan_path.exists() else ""
+    if "status: completed" not in automatic_plan or "make check" not in automatic_plan:
+        failures.append("automatic reachability flag plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

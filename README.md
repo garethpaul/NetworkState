@@ -55,6 +55,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.
 - `NetworkState.isReachableWithFlags(_:)` keeps reachability flag evaluation testable for fixture-style checks.
+- Automatic connection reachability flags are considered reachable when no user intervention is required.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
@@ -82,6 +83,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 - The library uses `SystemConfiguration` reachability and should keep checks local to the device.
 - Reachability flag evaluation should remain covered by fixture-style tests rather than relying only on live network state.
+- Automatic connection reachability flags should stay covered so connection-on-demand paths do not report false negatives.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 

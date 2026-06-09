@@ -26,4 +26,16 @@ class NetworkStateTests: XCTestCase {
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: 0)))
     }
 
+    func testReachabilityFlagEvaluationAllowsAutomaticConnection() {
+        let reachable = UInt32(kSCNetworkFlagsReachable)
+        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
+        let connectionOnDemand = UInt32(kSCNetworkFlagsConnectionOnDemand)
+        let connectionOnTraffic = UInt32(kSCNetworkFlagsConnectionOnTraffic)
+        let interventionRequired = UInt32(kSCNetworkFlagsInterventionRequired)
+
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnDemand)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnTraffic)))
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnDemand | interventionRequired)))
+    }
+
 }

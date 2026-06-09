@@ -32,6 +32,11 @@ public class NetworkState {
     public class func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool {
         let isReachable = (flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0
         let needsConnection = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionRequired)) != 0
-        return (isReachable && !needsConnection)
+        let canConnectAutomatically = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionOnDemand)) != 0 ||
+            (flags.rawValue & UInt32(kSCNetworkFlagsConnectionOnTraffic)) != 0
+        let interventionRequired = (flags.rawValue & UInt32(kSCNetworkFlagsInterventionRequired)) != 0
+        let canConnectWithoutUserInteraction = canConnectAutomatically && !interventionRequired
+
+        return isReachable && (!needsConnection || canConnectWithoutUserInteraction)
     }
 }
