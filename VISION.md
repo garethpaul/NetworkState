@@ -28,6 +28,7 @@ Priority:
 - Keep simulator verification independent of local signing identities by
   default
 - Keep Xcode deployment targets aligned with the podspec's iOS 8.0 support
+- Keep framework version alignment between the Info.plist and podspec metadata
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   SDK-free static baseline
 
@@ -51,6 +52,7 @@ Contribution rules:
 - Preserve the reachable flag requirement for automatic connection cases.
 - Preserve intervention-required flag handling when changing reachability logic.
 - Preserve deployment target alignment when changing package metadata.
+- Preserve framework version alignment when changing release metadata.
 
 ## Security
 

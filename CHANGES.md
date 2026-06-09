@@ -4,6 +4,8 @@
 
 - Added `make lint`, `make test`, and `make build` aliases so standard local
   gates run the same SDK-free static baseline as `make check`.
+- Aligned the framework Info.plist version with the podspec's `0.0.2` release
+  metadata.
 
 ## 2026-06-08
 

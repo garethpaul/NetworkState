@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import plistlib
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -32,6 +33,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-podspec-deployment-target-alignment.md",
     "docs/plans/2026-06-09-intervention-required-flag.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
+    "docs/plans/2026-06-09-framework-version-alignment.md",
     "docs/readme-overview.svg",
 ]
 
@@ -103,6 +105,10 @@ def main() -> int:
             failures.append(f"Makefile must include standard gate alias: {phrase}")
 
     podspec = read("NetworkState.podspec")
+    podspec_version_match = re.search(r's\.version\s*=\s*"([^"]+)"', podspec)
+    podspec_version = podspec_version_match.group(1) if podspec_version_match else None
+    if podspec_version is None:
+        failures.append("podspec must keep the current published version visible")
     for phrase in ['s.framework  = "SystemConfiguration"', 's.source_files = "NetworkState/*.{swift}"', 's.social_media_url   = "https://twitter.com/gpj"']:
         if phrase not in podspec:
             failures.append(f"podspec must include {phrase}")
@@ -148,6 +154,7 @@ def main() -> int:
         "requires the reachable flag",
         "intervention-required flag",
         "iOS 8.0",
+        "framework version alignment",
         "make lint",
         "make test",
         "make build",
@@ -184,12 +191,23 @@ def main() -> int:
     make_gate_plan = make_gate_plan_path.read_text(encoding="utf-8") if make_gate_plan_path.exists() else ""
     if "status: completed" not in make_gate_plan or "make check" not in make_gate_plan:
         failures.append("Make gate alias plan must record status and verification")
+    framework_version_plan_path = ROOT / "docs/plans/2026-06-09-framework-version-alignment.md"
+    framework_version_plan = framework_version_plan_path.read_text(encoding="utf-8") if framework_version_plan_path.exists() else ""
+    if "status: completed" not in framework_version_plan or "make check" not in framework_version_plan:
+        failures.append("framework version alignment plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:
-            plistlib.loads((ROOT / plist_path).read_bytes())
+            info = plistlib.loads((ROOT / plist_path).read_bytes())
         except Exception as error:
             failures.append(f"{plist_path} must parse as a plist: {error}")
+            continue
+        if (
+            plist_path == "NetworkState/Info.plist"
+            and podspec_version is not None
+            and info.get("CFBundleShortVersionString") != podspec_version
+        ):
+            failures.append(f"framework Info.plist version must match NetworkState.podspec version {podspec_version}")
 
     for xml_path in ["docs/readme-overview.svg", "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme"]:
         try:

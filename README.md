@@ -67,6 +67,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
 - The Xcode project deployment targets align with the podspec's declared iOS 8.0 support.
+- Framework version alignment keeps `NetworkState/Info.plist` on the same
+  public version as `NetworkState.podspec`.
 
 ```bash
 DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
@@ -111,6 +113,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   changes, then run Xcode and CocoaPods verification on macOS when package
   metadata or Swift behavior changes.
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
+- Keep framework version alignment between `NetworkState/Info.plist` and
+  `NetworkState.podspec` before publishing package metadata.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the standard local gate
   aliases.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

@@ -38,6 +38,8 @@ Helpful reports include:
   `pod spec lint NetworkState.podspec` before publishing package metadata
   changes.
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
+- Framework version alignment should keep `NetworkState/Info.plist` and
+  `NetworkState.podspec` on the same public version before package release.
 
 ## Mobile Privacy Notes
 
