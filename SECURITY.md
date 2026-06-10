@@ -42,6 +42,8 @@ Helpful reports include:
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
 - Framework version alignment should keep `NetworkState/Info.plist` and
   `NetworkState.podspec` on the same public version before package release.
+- The shared framework scheme should keep the `NetworkState.framework` target
+  available for direct Xcode builds alongside the test scheme.
 
 ## Mobile Privacy Notes
 
@@ -51,7 +53,10 @@ If this project requests device permissions such as location, camera, microphone
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
-For this repository, keep signing identities, local xcconfig files, `.env` files, and generated build products out of git.
+For this repository, keep signing identities, local xcconfig files, `.env`
+files, and generated build products out of git. Preserve the shared framework
+scheme when changing project metadata so package verification remains
+repeatable.
 
 ## Safe Research Guidelines
 

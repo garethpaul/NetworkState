@@ -24,6 +24,7 @@ REQUIRED = [
     "NetworkStateTests/NetworkStateTests.swift",
     "NetworkStateTests/Info.plist",
     "NetworkState.xcodeproj/project.pbxproj",
+    "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkState.xcscheme",
     "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme",
     "docs/plans/2026-06-08-network-state-baseline.md",
     "docs/plans/2026-06-09-unsigned-build-default.md",
@@ -35,6 +36,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-09-framework-version-alignment.md",
     "docs/plans/2026-06-09-combined-automatic-flags.md",
+    "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
     "docs/readme-overview.svg",
 ]
 
@@ -131,6 +133,14 @@ def main() -> int:
     if "- make check" not in travis or "- ./build.sh" not in travis:
         failures.append(".travis.yml must run static checks before the Xcode build")
 
+    framework_scheme = read("NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkState.xcscheme")
+    if (
+        'BuildableName = "NetworkState.framework"' not in framework_scheme
+        or 'BlueprintName = "NetworkState"' not in framework_scheme
+        or 'buildForArchiving = "YES"' not in framework_scheme
+    ):
+        failures.append("shared framework scheme must build the NetworkState framework target")
+
     gitignore = read(".gitignore")
     for expected in [
         "DerivedData/",
@@ -159,6 +169,7 @@ def main() -> int:
         "intervention-required flag",
         "iOS 8.0",
         "framework version alignment",
+        "shared framework scheme",
         "make lint",
         "make test",
         "make build",
@@ -203,6 +214,10 @@ def main() -> int:
     combined_flags_plan = combined_flags_plan_path.read_text(encoding="utf-8") if combined_flags_plan_path.exists() else ""
     if "status: completed" not in combined_flags_plan or "make check" not in combined_flags_plan:
         failures.append("combined automatic connection flag plan must record status and verification")
+    shared_scheme_plan_path = ROOT / "docs/plans/2026-06-10-shared-framework-scheme-guard.md"
+    shared_scheme_plan = shared_scheme_plan_path.read_text(encoding="utf-8") if shared_scheme_plan_path.exists() else ""
+    if "status: completed" not in shared_scheme_plan or "make check" not in shared_scheme_plan:
+        failures.append("shared framework scheme guard plan must record status and verification")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:
@@ -217,7 +232,11 @@ def main() -> int:
         ):
             failures.append(f"framework Info.plist version must match NetworkState.podspec version {podspec_version}")
 
-    for xml_path in ["docs/readme-overview.svg", "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme"]:
+    for xml_path in [
+        "docs/readme-overview.svg",
+        "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkState.xcscheme",
+        "NetworkState.xcodeproj/xcshareddata/xcschemes/NetworkStateTests.xcscheme",
+    ]:
         try:
             ET.parse(ROOT / xml_path)
         except Exception as error:

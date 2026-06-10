@@ -71,6 +71,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - The Xcode project deployment targets align with the podspec's declared iOS 8.0 support.
 - Framework version alignment keeps `NetworkState/Info.plist` on the same
   public version as `NetworkState.podspec`.
+- The shared framework scheme keeps the `NetworkState.framework` target
+  available to Xcode consumers alongside the test scheme.
 
 ```bash
 DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
@@ -119,6 +121,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
 - Keep framework version alignment between `NetworkState/Info.plist` and
   `NetworkState.podspec` before publishing package metadata.
+- Keep the shared framework scheme aligned with the `NetworkState.framework`
+  target so Xcode consumers can build the framework directly.
 - Keep combined automatic connection flags covered in fixture-style tests before
   changing reachability evaluation.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the standard local gate

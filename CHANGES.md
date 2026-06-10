@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-10
+
+- Added a shared framework scheme guard so the static baseline catches Xcode
+  project changes that stop exposing `NetworkState.framework` directly.
+
 ## 2026-06-09
 
 - Added `make lint`, `make test`, and `make build` aliases so standard local

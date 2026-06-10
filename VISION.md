@@ -30,6 +30,8 @@ Priority:
   default
 - Keep Xcode deployment targets aligned with the podspec's iOS 8.0 support
 - Keep framework version alignment between the Info.plist and podspec metadata
+- Keep the shared framework scheme available for the `NetworkState.framework`
+  target
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   SDK-free static baseline
 
@@ -55,6 +57,7 @@ Contribution rules:
 - Preserve intervention-required flag handling when changing reachability logic.
 - Preserve deployment target alignment when changing package metadata.
 - Preserve framework version alignment when changing release metadata.
+- Preserve the shared framework scheme when changing Xcode project metadata.
 
 ## Security
 
