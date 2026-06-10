@@ -40,6 +40,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-framework-version-alignment.md",
     "docs/plans/2026-06-09-combined-automatic-flags.md",
     "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
+    "docs/plans/2026-06-10-non-reachability-flags.md",
     "docs/plans/2026-06-10-hosted-project-validation.md",
     "docs/readme-overview.svg",
 ]
@@ -78,6 +79,8 @@ def main() -> int:
         failures.append("automatic reachability handling must still require the reachable flag")
     if "return isReachable && !interventionRequired" not in swift:
         failures.append("reachability evaluation must reject intervention-required states")
+    if "(flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0" not in swift:
+        failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
@@ -94,6 +97,13 @@ def main() -> int:
         failures.append("tests must cover combined automatic connection reachability flags")
     if "testInterventionRequiredFlagPreventsReachability" not in tests:
         failures.append("tests must cover intervention-required reachability flags")
+    if (
+        "testNonReachabilityFlagsDoNotCreateConnectivity" not in tests
+        or "kSCNetworkFlagsTransientConnection" not in tests
+        or "kSCNetworkFlagsIsLocalAddress" not in tests
+        or "kSCNetworkFlagsIsDirect" not in tests
+    ):
+        failures.append("tests must cover ancillary flags with and without the Reachable flag")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -222,6 +232,9 @@ def main() -> int:
     shared_scheme_plan = shared_scheme_plan_path.read_text(encoding="utf-8") if shared_scheme_plan_path.exists() else ""
     if "status: completed" not in shared_scheme_plan or "make check" not in shared_scheme_plan:
         failures.append("shared framework scheme guard plan must record status and verification")
+    non_reachability_plan = read("docs/plans/2026-06-10-non-reachability-flags.md")
+    if "status: completed" not in non_reachability_plan or "make check" not in non_reachability_plan:
+        failures.append("non-reachability flag guard plan must record status and verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")

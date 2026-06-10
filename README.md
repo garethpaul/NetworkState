@@ -64,6 +64,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   flag is present and no user intervention is required.
 - The intervention-required flag prevents reachability even when the base
   reachable flag is present.
+- The non-reachability flag guard verifies transient, local-address, and direct
+  bits cannot create connectivity without the `Reachable` flag.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
@@ -112,6 +114,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   on-traffic states remain accepted together.
 - The intervention-required flag should keep user-action states from reporting
   connected.
+- Preserve the non-reachability flag guard when adding ancillary flag handling.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 
