@@ -4,6 +4,8 @@
 from pathlib import Path
 import plistlib
 import re
+import shutil
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
@@ -11,6 +13,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
+    ".github/workflows/check.yml",
     ".travis.yml",
     "CHANGES.md",
     "Makefile",
@@ -37,6 +40,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-framework-version-alignment.md",
     "docs/plans/2026-06-09-combined-automatic-flags.md",
     "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
+    "docs/plans/2026-06-10-hosted-project-validation.md",
     "docs/readme-overview.svg",
 ]
 
@@ -218,6 +222,34 @@ def main() -> int:
     shared_scheme_plan = shared_scheme_plan_path.read_text(encoding="utf-8") if shared_scheme_plan_path.exists() else ""
     if "status: completed" not in shared_scheme_plan or "make check" not in shared_scheme_plan:
         failures.append("shared framework scheme guard plan must record status and verification")
+
+    hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
+    workflow = read(".github/workflows/check.yml")
+    if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
+        failures.append("hosted project validation plan must record status and verification")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: macos-15",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
+
+    if shutil.which("xcodebuild"):
+        result = subprocess.run(
+            ["xcodebuild", "-list", "-project", "NetworkState.xcodeproj"],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode != 0:
+            failures.append("xcodebuild could not parse NetworkState.xcodeproj: " + result.stderr.strip())
+    else:
+        print("xcodebuild unavailable; static iOS baseline only.")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:

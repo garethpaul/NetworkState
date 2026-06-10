@@ -84,6 +84,9 @@ DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
 - `make test`
 - `make build`
 - `make check`
+- Pinned `macos-15` GitHub Actions runs the SDK-free baseline and parses
+  `NetworkState.xcodeproj` without simulator execution, signing, pod
+  publishing, or runtime connectivity checks.
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 - XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.

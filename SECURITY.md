@@ -39,6 +39,8 @@ Helpful reports include:
   `make test`, `make build`, `make check`, and
   `pod spec lint NetworkState.podspec` before publishing package metadata
   changes.
+- The pinned macOS workflow runs static checks and project parsing without
+  simulator execution, signing, pod publishing, or runtime connectivity checks.
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
 - Framework version alignment should keep `NetworkState/Info.plist` and
   `NetworkState.podspec` on the same public version before package release.

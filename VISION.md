@@ -34,6 +34,8 @@ Priority:
   target
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   SDK-free static baseline
+- Keep hosted macOS project parsing pinned, read-only, and separate from the
+  legacy simulator build
 
 Next priorities:
 

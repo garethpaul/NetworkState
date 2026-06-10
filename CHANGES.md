@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Added pinned, read-only macOS hosted validation for the SDK-free baseline and
+  `NetworkState.xcodeproj` parsing.
 - Added a shared framework scheme guard so the static baseline catches Xcode
   project changes that stop exposing `NetworkState.framework` directly.
 
