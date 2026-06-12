@@ -64,6 +64,9 @@ files, and generated build products out of git. Preserve the shared framework
 scheme when changing project metadata so package verification remains
 repeatable.
 
+The hosted gate uses a credential-free checkout so its read-only token is not
+retained in the runner's Git configuration.
+
 ## Safe Research Guidelines
 
 Good-faith research is welcome when it stays within these boundaries:

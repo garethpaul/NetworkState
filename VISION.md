@@ -38,6 +38,7 @@ Priority:
   SDK-free static baseline
 - Keep hosted macOS project parsing pinned, read-only, and separate from the
   legacy simulator build
+- Keep hosted source retrieval credential-free after checkout
 
 Next priorities:
 
