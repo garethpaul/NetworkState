@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Added an automatic intervention matrix covering on-demand, on-traffic, and
+  combined automatic connection flags while user action is required.
 - Added a non-reachability flag guard covering transient, local-address, and
   direct-route bits with and without the `Reachable` flag.
 - Added pinned, read-only macOS hosted validation for the SDK-free baseline and

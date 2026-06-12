@@ -1,6 +1,6 @@
 # Automatic Intervention Matrix
 
-status: planned
+status: completed
 
 ## Context
 
@@ -42,14 +42,20 @@ documentation.
 
 ## Verification
 
+Completed locally on 2026-06-12:
+
 - `python3 -m py_compile scripts/check-baseline.py`
 - `make lint`
 - `make test`
 - `make build`
 - `make check`
-- hostile mutations removing on-traffic or combined intervention coverage
+- hostile mutations removing on-traffic or combined intervention coverage were
+  each rejected by the static contract
 - `git diff --check`
-- hosted push and pull-request checks
+
+`xcodebuild` is unavailable on this Linux host, so XCTest was not executed
+locally. Hosted push and pull-request checks will be recorded after the branch
+is pushed.
 
 ## Boundaries
 
