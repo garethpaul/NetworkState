@@ -42,6 +42,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
     "docs/plans/2026-06-10-non-reachability-flags.md",
     "docs/plans/2026-06-10-hosted-project-validation.md",
+    "docs/plans/2026-06-12-automatic-intervention-matrix.md",
     "docs/readme-overview.svg",
 ]
 
@@ -97,6 +98,15 @@ def main() -> int:
         failures.append("tests must cover combined automatic connection reachability flags")
     if "testInterventionRequiredFlagPreventsReachability" not in tests:
         failures.append("tests must cover intervention-required reachability flags")
+    automatic_intervention_test = tests.split("func testAutomaticConnectionModesRequireNoUserIntervention()", 1)[-1].split("func testNonReachabilityFlagsDoNotCreateConnectivity()", 1)[0]
+    if (
+        "func testAutomaticConnectionModesRequireNoUserIntervention()" not in tests
+        or "requiredFlags | connectionOnDemand" not in automatic_intervention_test
+        or "requiredFlags | connectionOnTraffic" not in automatic_intervention_test
+        or "requiredFlags | connectionOnDemand | connectionOnTraffic" not in automatic_intervention_test
+        or automatic_intervention_test.count("XCTAssertFalse") != 3
+    ):
+        failures.append("tests must cover intervention across every automatic connection mode")
     if (
         "testNonReachabilityFlagsDoNotCreateConnectivity" not in tests
         or "kSCNetworkFlagsTransientConnection" not in tests
@@ -181,6 +191,7 @@ def main() -> int:
         "requires the reachable flag",
         "combined automatic connection flags",
         "intervention-required flag",
+        "automatic intervention matrix",
         "iOS 8.0",
         "framework version alignment",
         "shared framework scheme",
@@ -235,6 +246,9 @@ def main() -> int:
     non_reachability_plan = read("docs/plans/2026-06-10-non-reachability-flags.md")
     if "status: completed" not in non_reachability_plan or "make check" not in non_reachability_plan:
         failures.append("non-reachability flag guard plan must record status and verification")
+    automatic_intervention_plan = read("docs/plans/2026-06-12-automatic-intervention-matrix.md")
+    if "status: completed" not in automatic_intervention_plan or "hostile mutations" not in automatic_intervention_plan:
+        failures.append("automatic intervention matrix plan must record completed verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")

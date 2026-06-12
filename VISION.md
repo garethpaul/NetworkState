@@ -24,6 +24,7 @@ Priority:
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests
 - Keep the intervention-required flag from reporting connectivity
+- Keep the automatic intervention matrix across every automatic connection mode
 - Keep the non-reachability flag guard around ancillary route flags
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
