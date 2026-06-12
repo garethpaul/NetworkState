@@ -24,6 +24,7 @@ Priority:
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests
 - Keep the intervention-required flag from reporting connectivity
+- Keep the non-reachability flag guard around ancillary route flags
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
@@ -34,6 +35,8 @@ Priority:
   target
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   SDK-free static baseline
+- Keep hosted macOS project parsing pinned, read-only, and separate from the
+  legacy simulator build
 
 Next priorities:
 
@@ -55,6 +58,7 @@ Contribution rules:
 - Preserve the reachable flag requirement for automatic connection cases.
 - Preserve combined automatic connection flags coverage when changing flag logic.
 - Preserve intervention-required flag handling when changing reachability logic.
+- Preserve the non-reachability flag guard when changing ancillary flag logic.
 - Preserve deployment target alignment when changing package metadata.
 - Preserve framework version alignment when changing release metadata.
 - Preserve the shared framework scheme when changing Xcode project metadata.

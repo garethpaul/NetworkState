@@ -63,4 +63,15 @@ class NetworkStateTests: XCTestCase {
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
     }
 
+    func testNonReachabilityFlagsDoNotCreateConnectivity() {
+        let reachable = UInt32(kSCNetworkFlagsReachable)
+        let transientConnection = UInt32(kSCNetworkFlagsTransientConnection)
+        let localAddress = UInt32(kSCNetworkFlagsIsLocalAddress)
+        let direct = UInt32(kSCNetworkFlagsIsDirect)
+        let ancillaryFlags = transientConnection | localAddress | direct
+
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: ancillaryFlags)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | ancillaryFlags)))
+    }
+
 }

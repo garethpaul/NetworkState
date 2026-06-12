@@ -33,12 +33,16 @@ Helpful reports include:
   on-traffic states remain accepted together when reachable.
 - The intervention-required flag should prevent connectivity from being
   reported when the network state still needs user action.
+- The non-reachability flag guard should ensure ancillary route flags cannot
+  report connectivity without the `Reachable` bit.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - CocoaPods metadata lives in `NetworkState.podspec`. Run `make lint`,
   `make test`, `make build`, `make check`, and
   `pod spec lint NetworkState.podspec` before publishing package metadata
   changes.
+- The pinned macOS workflow runs static checks and project parsing without
+  simulator execution, signing, pod publishing, or runtime connectivity checks.
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
 - Framework version alignment should keep `NetworkState/Info.plist` and
   `NetworkState.podspec` on the same public version before package release.

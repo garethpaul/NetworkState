@@ -4,6 +4,8 @@
 from pathlib import Path
 import plistlib
 import re
+import shutil
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
@@ -11,6 +13,8 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
+    ".github/CODEOWNERS",
+    ".github/workflows/check.yml",
     ".travis.yml",
     "CHANGES.md",
     "Makefile",
@@ -37,6 +41,8 @@ REQUIRED = [
     "docs/plans/2026-06-09-framework-version-alignment.md",
     "docs/plans/2026-06-09-combined-automatic-flags.md",
     "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
+    "docs/plans/2026-06-10-non-reachability-flags.md",
+    "docs/plans/2026-06-10-hosted-project-validation.md",
     "docs/readme-overview.svg",
 ]
 
@@ -74,6 +80,8 @@ def main() -> int:
         failures.append("automatic reachability handling must still require the reachable flag")
     if "return isReachable && !interventionRequired" not in swift:
         failures.append("reachability evaluation must reject intervention-required states")
+    if "(flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0" not in swift:
+        failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
@@ -90,6 +98,13 @@ def main() -> int:
         failures.append("tests must cover combined automatic connection reachability flags")
     if "testInterventionRequiredFlagPreventsReachability" not in tests:
         failures.append("tests must cover intervention-required reachability flags")
+    if (
+        "testNonReachabilityFlagsDoNotCreateConnectivity" not in tests
+        or "kSCNetworkFlagsTransientConnection" not in tests
+        or "kSCNetworkFlagsIsLocalAddress" not in tests
+        or "kSCNetworkFlagsIsDirect" not in tests
+    ):
+        failures.append("tests must cover ancillary flags with and without the Reachable flag")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -218,6 +233,48 @@ def main() -> int:
     shared_scheme_plan = shared_scheme_plan_path.read_text(encoding="utf-8") if shared_scheme_plan_path.exists() else ""
     if "status: completed" not in shared_scheme_plan or "make check" not in shared_scheme_plan:
         failures.append("shared framework scheme guard plan must record status and verification")
+    non_reachability_plan = read("docs/plans/2026-06-10-non-reachability-flags.md")
+    if "status: completed" not in non_reachability_plan or "make check" not in non_reachability_plan:
+        failures.append("non-reachability flag guard plan must record status and verification")
+
+    hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
+    workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
+    if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
+        failures.append("hosted project validation plan must record status and verification")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: macos-15",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / ".github/workflows").rglob("*")
+        if path.is_file()
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
+
+    if shutil.which("xcodebuild"):
+        result = subprocess.run(
+            ["xcodebuild", "-list", "-project", "NetworkState.xcodeproj"],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode != 0:
+            failures.append("xcodebuild could not parse NetworkState.xcodeproj: " + result.stderr.strip())
+    else:
+        print("xcodebuild unavailable; static iOS baseline only.")
 
     for plist_path in ["NetworkState/Info.plist", "NetworkStateTests/Info.plist"]:
         try:
