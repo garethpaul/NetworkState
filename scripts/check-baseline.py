@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     ".travis.yml",
     "CHANGES.md",
@@ -238,6 +239,7 @@ def main() -> int:
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
     if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
         failures.append("hosted project validation plan must record status and verification")
     for expected in [
@@ -246,10 +248,20 @@ def main() -> int:
         "runs-on: macos-15",
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
         "run: make check",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / ".github/workflows").rglob("*")
+        if path.is_file()
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
 
     if shutil.which("xcodebuild"):
         result = subprocess.run(
