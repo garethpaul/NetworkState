@@ -54,8 +54,13 @@ Completed locally on 2026-06-12:
 - `git diff --check`
 
 `xcodebuild` is unavailable on this Linux host, so XCTest was not executed
-locally. Hosted push and pull-request checks will be recorded after the branch
-is pushed.
+locally.
+
+Completed on hosted macOS for implementation head
+`70801c49325700194ab14fa3ea44a22c7747fc80`:
+
+- push run `27397655613`: success
+- pull-request run `27397656753`: success
 
 ## Boundaries
 
