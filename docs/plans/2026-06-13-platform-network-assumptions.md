@@ -1,6 +1,6 @@
 ---
 title: Document platform and network assumptions
-status: planned
+status: completed
 date: 2026-06-13
 ---
 
@@ -65,3 +65,15 @@ Files: `scripts/check-baseline.py`
 - `SCNetworkReachability` flags are not a substitute for request-level error
   handling, so the README must avoid presenting the helper as an internet
   availability oracle.
+
+## Verification Result
+
+- `make lint`, `make test`, `make build`, and `make check` passed the complete
+  SDK-free baseline.
+- External-working-directory checker execution, Python compilation, workflow
+  YAML parsing, and `git diff --check` passed.
+- Six hostile mutations rejected weakened synchronous-snapshot, internet-
+  availability, package-manager, no-remote-probe, security non-guarantee, and
+  legacy-platform claims.
+- The intended documentation and checker diff passed credential-pattern and
+  generated-artifact scans.

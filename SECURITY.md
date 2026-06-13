@@ -26,6 +26,9 @@ Helpful reports include:
 
 - This repository appears to be an Apple platform application or Swift sample. The active security scope is the code and documentation on the default branch.
 - The core code uses `SystemConfiguration` reachability. Connectivity checks should remain local to the device and should not collect telemetry, browsing data, endpoint history, or packet contents.
+- Reachability must remain a local flag snapshot with no remote probes. A
+  positive result must not be documented as proof of internet access, DNS,
+  captive-portal completion, or availability of a specific service.
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.
@@ -43,6 +46,9 @@ Helpful reports include:
   `make test`, `make build`, `make check`, and
   `pod spec lint NetworkState.podspec` before publishing package metadata
   changes.
+- CocoaPods is the only declared package-manager integration. Swift Package
+  Manager and Carthage support require separate metadata and verification
+  before being advertised.
 - The pinned macOS workflow runs static checks and project parsing without
   simulator execution, signing, pod publishing, or runtime connectivity checks.
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.

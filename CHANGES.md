@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-06-13
+
+- Documented the synchronous IPv4 default-route reachability semantics, the
+  request-level failures callers must still handle, the legacy iOS 8.0
+  compatibility boundary, and CocoaPods-only package support.
+- Enforced the local-only, no-remote-probe documentation contract in the static
+  baseline.
+
 ## 2026-06-12
 
 - Disabled persisted checkout credentials and enforced the sole pinned
