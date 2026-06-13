@@ -2,6 +2,8 @@
 
 ## 2026-06-13
 
+- Made every SDK-free Make alias resolve the static checker from the checkout
+  when the Makefile is invoked by absolute path.
 - Documented the synchronous IPv4 default-route reachability semantics, the
   request-level failures callers must still handle, the legacy iOS 8.0
   compatibility boundary, and CocoaPods-only package support.

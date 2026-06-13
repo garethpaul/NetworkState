@@ -11,6 +11,17 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_MAKEFILE = """ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
+.PHONY: build check lint static-check test verify
+
+check: verify
+
+lint test build verify: static-check
+
+static-check:
+\tpython3 "$(ROOT)/scripts/check-baseline.py"
+"""
 REQUIRED = [
     ".gitignore",
     ".github/workflows/check.yml",
@@ -45,6 +56,7 @@ REQUIRED = [
     "docs/plans/2026-06-12-automatic-intervention-matrix.md",
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
     "docs/plans/2026-06-13-platform-network-assumptions.md",
+    "docs/plans/2026-06-13-location-independent-make.md",
     "docs/readme-overview.svg",
 ]
 
@@ -127,13 +139,8 @@ def main() -> int:
         failures.append("build.sh must use POSIX shell function syntax or no shell functions")
 
     makefile = read("Makefile")
-    for phrase in [
-        ".PHONY: build check lint static-check test verify",
-        "check: verify",
-        "lint test build verify: static-check",
-    ]:
-        if phrase not in makefile:
-            failures.append(f"Makefile must include standard gate alias: {phrase}")
+    if makefile != EXPECTED_MAKEFILE:
+        failures.append("Makefile must exactly preserve rooted SDK-free aliases")
 
     podspec = read("NetworkState.podspec")
     podspec_version_match = re.search(r's\.version\s*=\s*"([^"]+)"', podspec)
@@ -182,7 +189,24 @@ def main() -> int:
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 
-    docs = read("README.md") + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
+    readme_source = read("README.md")
+    docs = readme_source + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
+    location_independent_make_plan = read(
+        "docs/plans/2026-06-13-location-independent-make.md"
+    )
+    if "make -f /path/to/NetworkState/Makefile check" not in readme_source:
+        failures.append("README must document location-independent Makefile invocation")
+    if not all(
+        evidence in location_independent_make_plan.lower()
+        for evidence in [
+            "status: completed",
+            "root and external-directory",
+            "five isolated hostile mutations",
+        ]
+    ):
+        failures.append(
+            "location-independent Make plan must record completed root, external, and mutation verification"
+        )
     for phrase in [
         "make check",
         "pod spec lint",

@@ -69,6 +69,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - The non-reachability flag guard verifies transient, local-address, and direct
   bits cannot create connectivity without the `Reachable` flag.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
+- The Make gates are location-independent. From another directory, pass the
+  checkout's Makefile by absolute path, such as
+  `make -f /path/to/NetworkState/Makefile check`.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
@@ -145,6 +148,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   changes, then run Xcode and CocoaPods verification on macOS when package
   metadata or Swift behavior changes.
+- Use an absolute Makefile path when running those gates outside the checkout.
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
 - Keep framework version alignment between `NetworkState/Info.plist` and
   `NetworkState.podspec` before publishing package metadata.
