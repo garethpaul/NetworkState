@@ -39,13 +39,19 @@ Priority:
 - Keep hosted macOS project parsing pinned, read-only, and separate from the
   legacy simulator build
 - Keep hosted source retrieval credential-free after checkout
+- Keep the platform contract explicit: iOS 8.0 is a legacy package boundary,
+  not a current-Xcode compatibility claim
+- Keep reachability documented as a synchronous IPv4 default-route flag
+  snapshot rather than proof of internet or service availability
+- Keep CocoaPods as the only declared package-manager integration until another
+  manager is added and verified in a focused change
+- Keep connectivity evaluation local to the device with no remote probes,
+  telemetry, or endpoint checks
 
 Next priorities:
 
-- Document platform and network-framework assumptions
 - Modernize Swift/project settings in a dedicated pass
 - Add tests for offline, online, and constrained network cases where practical
-- Clarify package-manager support if revived
 - Run `pod spec lint NetworkState.podspec` on macOS before any package release
 
 Contribution rules:

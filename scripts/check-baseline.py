@@ -44,6 +44,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-hosted-project-validation.md",
     "docs/plans/2026-06-12-automatic-intervention-matrix.md",
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
+    "docs/plans/2026-06-13-platform-network-assumptions.md",
     "docs/readme-overview.svg",
 ]
 
@@ -203,6 +204,41 @@ def main() -> int:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
 
+    readme = " ".join(read("README.md").split())
+    for phrase in [
+        "synchronous snapshot",
+        "IPv4 default route",
+        "does not prove internet access",
+        "DNS resolution",
+        "captive-portal completion",
+        "availability of a specific service",
+        "legacy compatibility boundary",
+        "CocoaPods is the only declared package-manager integration",
+        "Swift Package Manager and Carthage are unsupported",
+        "no remote probes",
+    ]:
+        if phrase not in readme:
+            failures.append(f"README platform assumptions must mention {phrase}")
+
+    security = " ".join(read("SECURITY.md").split())
+    for phrase in [
+        "local flag snapshot with no remote probes",
+        "must not be documented as proof of internet access",
+        "CocoaPods is the only declared package-manager integration",
+    ]:
+        if phrase not in security:
+            failures.append(f"security platform assumptions must mention {phrase}")
+
+    vision = " ".join(read("VISION.md").split())
+    for phrase in [
+        "iOS 8.0 is a legacy package boundary",
+        "synchronous IPv4 default-route flag snapshot",
+        "CocoaPods as the only declared package-manager integration",
+        "no remote probes",
+    ]:
+        if phrase not in vision:
+            failures.append(f"vision platform assumptions must mention {phrase}")
+
     plan = read("docs/plans/2026-06-08-network-state-baseline.md")
     if "status: completed" not in plan or "make check" not in plan:
         failures.append("completed plan must record status and verification")
@@ -273,6 +309,13 @@ def main() -> int:
         or "hostile mutations rejected" not in checkout_plan
     ):
         failures.append("checkout credential plan must record completed verification")
+    assumptions_plan = read("docs/plans/2026-06-13-platform-network-assumptions.md")
+    if (
+        "status: completed" not in assumptions_plan
+        or "make check" not in assumptions_plan
+        or "hostile mutations rejected" not in assumptions_plan
+    ):
+        failures.append("platform assumptions plan must record completed verification")
     workflow_files = sorted(
         path.relative_to(ROOT).as_posix()
         for path in (ROOT / ".github/workflows").iterdir()

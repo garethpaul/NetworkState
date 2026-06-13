@@ -82,6 +82,22 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
 ```
 
+## Platform, Packaging, And Reachability Assumptions
+
+- `isConnectedToNetwork()` is a synchronous snapshot of
+  `SCNetworkReachability` flags for the IPv4 default route. It does not monitor
+  later network changes.
+- A `true` result does not prove internet access, DNS resolution, captive-portal
+  completion, or availability of a specific service. Callers must still handle
+  request-level failures and timeouts.
+- The podspec declares iOS 8.0 because this is a legacy compatibility boundary,
+  not a claim that the project builds unchanged with current Xcode or Swift.
+- CocoaPods is the only declared package-manager integration. Swift Package
+  Manager and Carthage are unsupported unless added in a separate reviewed
+  change.
+- The helper evaluates local SystemConfiguration state only. It performs no
+  remote probes, telemetry, request logging, or endpoint availability checks.
+
 ## Testing and Verification
 
 - `make lint`
