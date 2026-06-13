@@ -1,6 +1,6 @@
 # Location-Independent NetworkState Verification
 
-status: in progress
+status: completed
 
 ## Context
 
@@ -40,3 +40,25 @@ mutation verification after it completes.
 - Do not run dependency installation, builds, signing, simulators, remote
   probes, or application execution.
 - Preserve the existing stacked PR chain and exact-head evidence.
+
+## Work Completed
+
+- Rooted every SDK-free Make alias at the checkout containing the loaded
+  Makefile while preserving the existing target graph.
+- Added exact Makefile, README invocation, completed status, and verification
+  evidence contracts to `scripts/check-baseline.py`.
+- Documented absolute Makefile invocation without changing Swift, Xcode, or
+  workflow behavior.
+
+## Verification Completed
+
+- Root and external-directory `lint`, `test`, `build`, `verify`, and `check`
+  gates passed through the checkout's absolute Makefile path.
+- `python3 -m py_compile scripts/check-baseline.py` and `git diff --check`
+  passed.
+- Five isolated hostile mutations covering root derivation, checker resolution,
+  alias delegation, completed plan evidence, and README invocation guidance
+  were rejected by the intended contracts.
+- Intended-path, secret-pattern, conflict-marker, generated-artifact, Swift,
+  Xcode project, CocoaPods, test, workflow, and credential-boundary audits
+  passed.
