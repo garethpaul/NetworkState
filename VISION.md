@@ -23,7 +23,8 @@ Priority:
 - Keep automatic connection reachability flags covered without live network state
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests
-- Keep the intervention-required flag from reporting connectivity
+- Keep intervention-required handling scoped to connections that must first be
+  established
 - Keep the automatic intervention matrix across every automatic connection mode
 - Keep the non-reachability flag guard around ancillary route flags
 - Keep the WWAN reachability flag matrix around cellular routes

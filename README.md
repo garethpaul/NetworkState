@@ -62,8 +62,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Automatic connection handling still requires the reachable flag, so connection-on-demand flags alone do not report connectivity.
 - Combined automatic connection flags remain reachable when the base reachable
   flag is present and no user intervention is required.
-- The intervention-required flag prevents reachability even when the base
-  reachable flag is present.
+- The intervention-required flag prevents an automatic required connection
+  from being treated as reachable, but does not invalidate a route that is
+  already reachable without establishing a connection.
 - The automatic intervention matrix covers on-demand, on-traffic, and combined
   automatic modes so none report connectivity while user action is required.
 - The non-reachability flag guard verifies transient, local-address, and direct

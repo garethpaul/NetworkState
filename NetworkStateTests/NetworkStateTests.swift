@@ -56,11 +56,11 @@ class NetworkStateTests: XCTestCase {
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnDemand | connectionOnTraffic)))
     }
 
-    func testInterventionRequiredFlagPreventsReachability() {
+    func testInterventionRequiredDoesNotBlockEstablishedReachability() {
         let reachable = UInt32(kSCNetworkFlagsReachable)
         let interventionRequired = UInt32(kSCNetworkFlagsInterventionRequired)
 
-        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
     }
 
     func testAutomaticConnectionModesRequireNoUserIntervention() {
@@ -117,8 +117,8 @@ class NetworkStateTests: XCTestCase {
                             rawValue |= UInt32(kSCNetworkFlagsInterventionRequired)
                         }
 
-                        let expected = isReachable && !interventionRequired &&
-                            (!connectionRequired || canConnectAutomatically)
+                        let expected = isReachable &&
+                            (!connectionRequired || (canConnectAutomatically && !interventionRequired))
                         XCTAssertEqual(
                             NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: rawValue)),
                             expected

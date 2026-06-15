@@ -94,8 +94,10 @@ def main() -> int:
             failures.append(f"reachability flag evaluation must handle {phrase}")
     if "return isReachable &&" not in swift:
         failures.append("automatic reachability handling must still require the reachable flag")
-    if "return isReachable && !interventionRequired" not in swift:
-        failures.append("reachability evaluation must reject intervention-required states")
+    if "return isReachable && (!needsConnection || canConnectWithoutUserInteraction)" not in swift:
+        failures.append("reachability evaluation must scope intervention to required connections")
+    if "return isReachable && !interventionRequired" in swift:
+        failures.append("reachability evaluation must not apply intervention as a global veto")
     if "(flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0" not in swift:
         failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
@@ -112,8 +114,14 @@ def main() -> int:
         failures.append("tests must cover automatic connection flags without the reachable flag")
     if "testCombinedAutomaticConnectionFlagsAreReachable" not in tests:
         failures.append("tests must cover combined automatic connection reachability flags")
-    if "testInterventionRequiredFlagPreventsReachability" not in tests:
-        failures.append("tests must cover intervention-required reachability flags")
+    established_intervention_test = tests.split("func testInterventionRequiredDoesNotBlockEstablishedReachability()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testInterventionRequiredDoesNotBlockEstablishedReachability()" not in tests
+        or "reachable | interventionRequired" not in established_intervention_test
+        or established_intervention_test.count("XCTAssertTrue") != 1
+        or "XCTAssertFalse" in established_intervention_test
+    ):
+        failures.append("tests must keep established reachability independent of intervention state")
     automatic_intervention_test = tests.split("func testAutomaticConnectionModesRequireNoUserIntervention()", 1)[-1].split("func testNonReachabilityFlagsDoNotCreateConnectivity()", 1)[0]
     if (
         "func testAutomaticConnectionModesRequireNoUserIntervention()" not in tests
@@ -153,8 +161,8 @@ def main() -> int:
         or "kSCNetworkFlagsConnectionRequired" not in truth_table_test
         or "kSCNetworkFlagsConnectionOnDemand" not in truth_table_test
         or "kSCNetworkFlagsInterventionRequired" not in truth_table_test
-        or "let expected = isReachable && !interventionRequired &&" not in truth_table_test
-        or "(!connectionRequired || canConnectAutomatically)" not in truth_table_test
+        or "let expected = isReachable &&" not in truth_table_test
+        or "(!connectionRequired || (canConnectAutomatically && !interventionRequired))" not in truth_table_test
         or "XCTAssertEqual(coveredRows, 16)" not in truth_table_test
     ):
         failures.append("tests must cover the complete reachability decision truth table")
@@ -262,6 +270,15 @@ def main() -> int:
             failures.append(f"{relative_path} must document the WWAN reachability flag matrix")
         if "reachability decision truth table" not in read(relative_path).lower():
             failures.append(f"{relative_path} must document the reachability decision truth table")
+    intervention_scope_guidance = {
+        "README.md": "does not invalidate a route that is already reachable",
+        "SECURITY.md": "only when a required connection still needs user action",
+        "VISION.md": "scoped to connections that must first be established",
+        "CHANGES.md": "preserving already reachable routes that need no connection",
+    }
+    for relative_path, phrase in intervention_scope_guidance.items():
+        if phrase not in " ".join(read(relative_path).split()):
+            failures.append(f"{relative_path} must document intervention-required scope")
 
     readme = " ".join(read("README.md").split())
     for phrase in [
@@ -362,6 +379,15 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", truth_table_plan)
     ):
         failures.append("reachability decision truth table plan must record completed verification")
+    intervention_scope_plan = read("docs/plans/2026-06-15-intervention-required-scope.md")
+    if (
+        "status: completed" not in intervention_scope_plan.lower()
+        or "All four Make gates passed" not in intervention_scope_plan
+        or "Six isolated hostile mutations were rejected" not in intervention_scope_plan
+        or "external directory" not in intervention_scope_plan
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", intervention_scope_plan)
+    ):
+        failures.append("intervention-required scope plan must record completed verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")

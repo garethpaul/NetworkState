@@ -37,6 +37,6 @@ public class NetworkState {
         let interventionRequired = (flags.rawValue & UInt32(kSCNetworkFlagsInterventionRequired)) != 0
         let canConnectWithoutUserInteraction = canConnectAutomatically && !interventionRequired
 
-        return isReachable && !interventionRequired && (!needsConnection || canConnectWithoutUserInteraction)
+        return isReachable && (!needsConnection || canConnectWithoutUserInteraction)
     }
 }

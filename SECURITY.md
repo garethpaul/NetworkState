@@ -35,7 +35,8 @@ Helpful reports include:
 - Combined automatic connection flags should stay covered so on-demand and
   on-traffic states remain accepted together when reachable.
 - The intervention-required flag should prevent connectivity from being
-  reported when the network state still needs user action.
+  reported only when a required connection still needs user action; it should
+  not override an already established reachable route.
 - The automatic intervention matrix should cover on-demand, on-traffic, and
   combined automatic modes with user intervention required.
 - The non-reachability flag guard should ensure ancillary route flags cannot

@@ -6,6 +6,8 @@
   without the required `Reachable` flag.
 - Added a reachability decision truth table covering all 16 combinations of the
   four flags that control the public evaluator.
+- Scoped intervention-required handling to connections that must first be
+  established, preserving already reachable routes that need no connection.
 
 ## 2026-06-13
 

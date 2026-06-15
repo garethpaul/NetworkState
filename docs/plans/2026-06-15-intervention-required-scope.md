@@ -1,6 +1,6 @@
 # Intervention-Required Scope
 
-Status: planned
+Status: completed
 
 ## Problem
 
@@ -66,3 +66,25 @@ expected-value expression, so it cannot detect this boundary error.
 - A required connection remains unreachable when manual intervention is needed.
 - The exhaustive truth table and focused fixtures independently enforce both
   sides of that boundary.
+
+## Work Completed
+
+- Scoped the production intervention check to automatic connections that must
+  first be established.
+- Corrected the exhaustive truth-table oracle and added a focused established-
+  route fixture that rejects the previous global veto.
+- Strengthened the portable checker and synchronized user, security, vision,
+  and changelog guidance.
+
+## Verification Completed
+
+- All four Make gates passed from the repository and `make check` passed from
+  an external directory.
+- Six isolated hostile mutations were rejected for restoring the global veto,
+  weakening the focused fixture, weakening the truth-table oracle, removing
+  guidance, and reopening the plan status.
+- The exact eight-file implementation diff passed project/dependency,
+  generated-artifact, credential, conflict, binary, large-file, mode,
+  whitespace, and intended-path audits.
+- `xcodebuild` and XCTest were unavailable on Linux; the portable static iOS
+  baseline passed and no local runtime claim was made.
