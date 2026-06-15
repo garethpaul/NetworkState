@@ -70,6 +70,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   bits cannot create connectivity without the `Reachable` flag.
 - The WWAN reachability flag matrix verifies the cellular bit cannot create
   connectivity alone and remains accepted with `Reachable`.
+- The reachability decision truth table covers every combination of reachable,
+  connection-required, automatic-connect, and intervention-required state.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - The Make gates are location-independent. From another directory, pass the
   checkout's Makefile by absolute path, such as
@@ -142,6 +144,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   unreachable while intervention is required.
 - Preserve the non-reachability flag guard when adding ancillary flag handling.
 - Preserve the WWAN reachability flag matrix when changing cellular handling.
+- Preserve the reachability decision truth table when changing flag logic.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 

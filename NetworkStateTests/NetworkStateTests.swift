@@ -95,4 +95,41 @@ class NetworkStateTests: XCTestCase {
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))
     }
 
+    func testReachabilityDecisionTruthTable() {
+        let booleanValues = [false, true]
+        var coveredRows = 0
+
+        for isReachable in booleanValues {
+            for connectionRequired in booleanValues {
+                for canConnectAutomatically in booleanValues {
+                    for interventionRequired in booleanValues {
+                        var rawValue: UInt32 = 0
+                        if isReachable {
+                            rawValue |= UInt32(kSCNetworkFlagsReachable)
+                        }
+                        if connectionRequired {
+                            rawValue |= UInt32(kSCNetworkFlagsConnectionRequired)
+                        }
+                        if canConnectAutomatically {
+                            rawValue |= UInt32(kSCNetworkFlagsConnectionOnDemand)
+                        }
+                        if interventionRequired {
+                            rawValue |= UInt32(kSCNetworkFlagsInterventionRequired)
+                        }
+
+                        let expected = isReachable && !interventionRequired &&
+                            (!connectionRequired || canConnectAutomatically)
+                        XCTAssertEqual(
+                            NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: rawValue)),
+                            expected
+                        )
+                        coveredRows += 1
+                    }
+                }
+            }
+        }
+
+        XCTAssertEqual(coveredRows, 16)
+    }
+
 }

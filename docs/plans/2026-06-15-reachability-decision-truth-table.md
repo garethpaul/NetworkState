@@ -1,6 +1,6 @@
 # Reachability Decision Truth Table
 
-Status: planned
+Status: completed
 
 ## Problem
 
@@ -60,3 +60,24 @@ the named examples while regressing an uncovered combination.
 - Existing focused flag fixtures remain intact and continue to pass the portable
   checker.
 - No production, dependency, project, or workflow file changes are introduced.
+
+## Work Completed
+
+- Added a nested four-dimension XCTest matrix that constructs concrete
+  reachability flags and checks all 16 combinations against the documented
+  decision rule.
+- Retained every existing focused fixture and left production code unchanged.
+- Added mutation-sensitive portable contracts and synchronized guidance.
+
+## Verification Completed
+
+- All four Make gates passed from the repository and `make check` passed from
+  an external directory.
+- Seven isolated hostile mutations were rejected for incomplete dimensions,
+  missing flag inputs, incorrect expected logic, weakened row count, missing
+  guidance, and stale plan status.
+- The exact seven-file implementation diff passed project/dependency,
+  generated-artifact, credential, conflict, binary, large-file, mode,
+  whitespace, and intended-path audits.
+- `xcodebuild` and XCTest were unavailable on Linux; the portable static iOS
+  baseline passed and no local runtime claim was made.

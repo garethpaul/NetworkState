@@ -57,6 +57,8 @@ REQUIRED = [
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
     "docs/plans/2026-06-13-platform-network-assumptions.md",
     "docs/plans/2026-06-13-location-independent-make.md",
+    "docs/plans/2026-06-15-reachability-decision-truth-table.md",
+    "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
     "docs/readme-overview.svg",
 ]
 
@@ -138,6 +140,24 @@ def main() -> int:
         or wwan_test.count("XCTAssertTrue") != 1
     ):
         failures.append("tests must cover WWAN reachability with and without the Reachable flag")
+    truth_table_test = tests.split("func testReachabilityDecisionTruthTable()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testReachabilityDecisionTruthTable()" not in tests
+        or "let booleanValues = [false, true]" not in truth_table_test
+        or truth_table_test.count("for ") != 4
+        or "for isReachable in booleanValues" not in truth_table_test
+        or "for connectionRequired in booleanValues" not in truth_table_test
+        or "for canConnectAutomatically in booleanValues" not in truth_table_test
+        or "for interventionRequired in booleanValues" not in truth_table_test
+        or "kSCNetworkFlagsReachable" not in truth_table_test
+        or "kSCNetworkFlagsConnectionRequired" not in truth_table_test
+        or "kSCNetworkFlagsConnectionOnDemand" not in truth_table_test
+        or "kSCNetworkFlagsInterventionRequired" not in truth_table_test
+        or "let expected = isReachable && !interventionRequired &&" not in truth_table_test
+        or "(!connectionRequired || canConnectAutomatically)" not in truth_table_test
+        or "XCTAssertEqual(coveredRows, 16)" not in truth_table_test
+    ):
+        failures.append("tests must cover the complete reachability decision truth table")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -240,6 +260,8 @@ def main() -> int:
     for relative_path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
         if "wwan reachability flag matrix" not in read(relative_path).lower():
             failures.append(f"{relative_path} must document the WWAN reachability flag matrix")
+        if "reachability decision truth table" not in read(relative_path).lower():
+            failures.append(f"{relative_path} must document the reachability decision truth table")
 
     readme = " ".join(read("README.md").split())
     for phrase in [
@@ -331,6 +353,15 @@ def main() -> int:
         or "external directory" not in wwan_plan
     ):
         failures.append("WWAN reachability flag matrix plan must record completed verification")
+    truth_table_plan = read("docs/plans/2026-06-15-reachability-decision-truth-table.md")
+    if (
+        "status: completed" not in truth_table_plan.lower()
+        or "All four Make gates passed" not in truth_table_plan
+        or "Seven isolated hostile mutations were rejected" not in truth_table_plan
+        or "external directory" not in truth_table_plan
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", truth_table_plan)
+    ):
+        failures.append("reachability decision truth table plan must record completed verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")

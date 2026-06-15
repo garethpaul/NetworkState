@@ -27,6 +27,7 @@ Priority:
 - Keep the automatic intervention matrix across every automatic connection mode
 - Keep the non-reachability flag guard around ancillary route flags
 - Keep the WWAN reachability flag matrix around cellular routes
+- Keep the reachability decision truth table exhaustive across decision flags
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by

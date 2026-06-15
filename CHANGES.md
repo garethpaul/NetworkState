@@ -4,6 +4,8 @@
 
 - Added a WWAN reachability flag matrix covering the cellular bit with and
   without the required `Reachable` flag.
+- Added a reachability decision truth table covering all 16 combinations of the
+  four flags that control the public evaluator.
 
 ## 2026-06-13
 
