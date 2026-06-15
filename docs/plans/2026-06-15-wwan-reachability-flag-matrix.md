@@ -1,6 +1,6 @@
 # WWAN Reachability Flag Matrix
 
-status: in progress
+status: completed
 
 ## Problem
 
@@ -40,3 +40,25 @@ valid reachable cellular route without a focused regression.
 - This remains a local SystemConfiguration flag snapshot, not proof of internet
   access or availability of any remote service.
 - The stacked base pull request must remain available and merge first.
+
+## Work Completed
+
+- Added a focused XCTest fixture for `kSCNetworkFlagsIsWWAN` with and without
+  the required `Reachable` bit.
+- Preserved the production predicate and all existing automatic, intervention,
+  and ancillary flag fixtures.
+- Added exact portable contracts and synchronized maintenance guidance.
+
+## Verification Completed
+
+- All four Make gates passed from the repository and the canonical check passed
+  from an external directory through the absolute Makefile path.
+- The baseline checker compiled and passed; local Linux reported the existing
+  `xcodebuild` limitation and completed the static iOS baseline.
+- Six isolated hostile mutations were rejected: missing WWAN constant, missing
+  unreachable assertion, missing reachable assertion, inverted reachability,
+  missing guidance, and stale plan status.
+- `git diff --check`, exact intended-path, generated-artifact,
+  credential-pattern, Xcode project, conflict-marker, binary, and large-file
+  audits passed.
+- No live network request, remote probe, simulator, or device was used.

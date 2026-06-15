@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Added a WWAN reachability flag matrix covering the cellular bit with and
+  without the required `Reachable` flag.
+
 ## 2026-06-13
 
 - Made every SDK-free Make alias resolve the static checker from the checkout

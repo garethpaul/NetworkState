@@ -87,4 +87,12 @@ class NetworkStateTests: XCTestCase {
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | ancillaryFlags)))
     }
 
+    func testWWANFlagRequiresReachableBaseFlag() {
+        let reachable = UInt32(kSCNetworkFlagsReachable)
+        let wwan = UInt32(kSCNetworkFlagsIsWWAN)
+
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: wwan)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))
+    }
+
 }

@@ -68,6 +68,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   automatic modes so none report connectivity while user action is required.
 - The non-reachability flag guard verifies transient, local-address, and direct
   bits cannot create connectivity without the `Reachable` flag.
+- The WWAN reachability flag matrix verifies the cellular bit cannot create
+  connectivity alone and remains accepted with `Reachable`.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
 - The Make gates are location-independent. From another directory, pass the
   checkout's Makefile by absolute path, such as
@@ -139,6 +141,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - The automatic intervention matrix should keep every automatic connection mode
   unreachable while intervention is required.
 - Preserve the non-reachability flag guard when adding ancillary flag handling.
+- Preserve the WWAN reachability flag matrix when changing cellular handling.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 

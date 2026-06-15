@@ -40,6 +40,8 @@ Helpful reports include:
   combined automatic modes with user intervention required.
 - The non-reachability flag guard should ensure ancillary route flags cannot
   report connectivity without the `Reachable` bit.
+- The WWAN reachability flag matrix should keep the cellular bit dependent on
+  `Reachable` without rejecting valid reachable cellular routes.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - CocoaPods metadata lives in `NetworkState.podspec`. Run `make lint`,

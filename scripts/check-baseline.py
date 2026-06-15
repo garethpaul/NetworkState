@@ -128,6 +128,16 @@ def main() -> int:
         or "kSCNetworkFlagsIsDirect" not in tests
     ):
         failures.append("tests must cover ancillary flags with and without the Reachable flag")
+    wwan_test = tests.split("func testWWANFlagRequiresReachableBaseFlag()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testWWANFlagRequiresReachableBaseFlag()" not in tests
+        or "kSCNetworkFlagsIsWWAN" not in wwan_test
+        or "XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: wwan)))" not in wwan_test
+        or "XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))" not in wwan_test
+        or wwan_test.count("XCTAssertFalse") != 1
+        or wwan_test.count("XCTAssertTrue") != 1
+    ):
+        failures.append("tests must cover WWAN reachability with and without the Reachable flag")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
@@ -227,6 +237,9 @@ def main() -> int:
     ]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
+    for relative_path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
+        if "wwan reachability flag matrix" not in read(relative_path).lower():
+            failures.append(f"{relative_path} must document the WWAN reachability flag matrix")
 
     readme = " ".join(read("README.md").split())
     for phrase in [
@@ -310,6 +323,14 @@ def main() -> int:
     automatic_intervention_plan = read("docs/plans/2026-06-12-automatic-intervention-matrix.md")
     if "status: completed" not in automatic_intervention_plan or "hostile mutations" not in automatic_intervention_plan:
         failures.append("automatic intervention matrix plan must record completed verification")
+    wwan_plan = read("docs/plans/2026-06-15-wwan-reachability-flag-matrix.md")
+    if (
+        "status: completed" not in wwan_plan
+        or "All four Make gates passed" not in wwan_plan
+        or "Six isolated hostile mutations were rejected" not in wwan_plan
+        or "external directory" not in wwan_plan
+    ):
+        failures.append("WWAN reachability flag matrix plan must record completed verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")
