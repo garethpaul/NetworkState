@@ -11,10 +11,23 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_MAKEFILE = """ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
+.PHONY: build check lint static-check test verify
+
+check: verify
+
+lint test build verify: static-check
+
+static-check:
+\tpython3 "$(ROOT)/scripts/check-baseline.py"
+"""
 REQUIRED = [
     ".gitignore",
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     ".travis.yml",
+    "AGENTS.md",
     "CHANGES.md",
     "Makefile",
     "NetworkState.podspec",
@@ -42,6 +55,12 @@ REQUIRED = [
     "docs/plans/2026-06-10-shared-framework-scheme-guard.md",
     "docs/plans/2026-06-10-non-reachability-flags.md",
     "docs/plans/2026-06-10-hosted-project-validation.md",
+    "docs/plans/2026-06-12-automatic-intervention-matrix.md",
+    "docs/plans/2026-06-12-checkout-credential-boundary.md",
+    "docs/plans/2026-06-13-platform-network-assumptions.md",
+    "docs/plans/2026-06-13-location-independent-make.md",
+    "docs/plans/2026-06-15-reachability-decision-truth-table.md",
+    "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
     "docs/readme-overview.svg",
 ]
 
@@ -63,23 +82,25 @@ def main() -> int:
         failures.append("reachability creation must be guarded")
     if "defaultRouteReachability!" in swift:
         failures.append("reachability must not be force-unwrapped")
-    if "public class func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool" not in swift:
+    if "public class func isReachableWithFlags(_ flags: SCNetworkReachabilityFlags) -> Bool" not in swift:
         failures.append("reachability flag evaluation must be exposed for fixture tests")
     if "return isReachableWithFlags(flags)" not in swift:
         failures.append("isConnectedToNetwork must use the shared flag evaluator")
     for phrase in [
         "canConnectAutomatically",
-        "kSCNetworkFlagsConnectionOnDemand",
-        "kSCNetworkFlagsConnectionOnTraffic",
-        "kSCNetworkFlagsInterventionRequired",
+        "flags.contains(.connectionOnDemand)",
+        "flags.contains(.connectionOnTraffic)",
+        "flags.contains(.interventionRequired)",
     ]:
         if phrase not in swift:
             failures.append(f"reachability flag evaluation must handle {phrase}")
     if "return isReachable &&" not in swift:
         failures.append("automatic reachability handling must still require the reachable flag")
-    if "return isReachable && !interventionRequired" not in swift:
-        failures.append("reachability evaluation must reject intervention-required states")
-    if "(flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0" not in swift:
+    if "return isReachable && (!needsConnection || canConnectWithoutUserInteraction)" not in swift:
+        failures.append("reachability evaluation must scope intervention to required connections")
+    if "return isReachable && !interventionRequired" in swift:
+        failures.append("reachability evaluation must not apply intervention as a global veto")
+    if "flags.contains(.reachable)" not in swift:
         failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
@@ -95,33 +116,75 @@ def main() -> int:
         failures.append("tests must cover automatic connection flags without the reachable flag")
     if "testCombinedAutomaticConnectionFlagsAreReachable" not in tests:
         failures.append("tests must cover combined automatic connection reachability flags")
-    if "testInterventionRequiredFlagPreventsReachability" not in tests:
-        failures.append("tests must cover intervention-required reachability flags")
+    established_intervention_test = tests.split("func testInterventionRequiredDoesNotBlockEstablishedReachability()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testInterventionRequiredDoesNotBlockEstablishedReachability()" not in tests
+        or "reachable | interventionRequired" not in established_intervention_test
+        or established_intervention_test.count("XCTAssertTrue") != 1
+        or "XCTAssertFalse" in established_intervention_test
+    ):
+        failures.append("tests must keep established reachability independent of intervention state")
+    automatic_intervention_test = tests.split("func testAutomaticConnectionModesRequireNoUserIntervention()", 1)[-1].split("func testNonReachabilityFlagsDoNotCreateConnectivity()", 1)[0]
+    if (
+        "func testAutomaticConnectionModesRequireNoUserIntervention()" not in tests
+        or "requiredFlags | connectionOnDemand" not in automatic_intervention_test
+        or "requiredFlags | connectionOnTraffic" not in automatic_intervention_test
+        or "requiredFlags | connectionOnDemand | connectionOnTraffic" not in automatic_intervention_test
+        or automatic_intervention_test.count("XCTAssertFalse") != 3
+    ):
+        failures.append("tests must cover intervention across every automatic connection mode")
     if (
         "testNonReachabilityFlagsDoNotCreateConnectivity" not in tests
-        or "kSCNetworkFlagsTransientConnection" not in tests
-        or "kSCNetworkFlagsIsLocalAddress" not in tests
-        or "kSCNetworkFlagsIsDirect" not in tests
+        or "SCNetworkReachabilityFlags.transientConnection.rawValue" not in tests
+        or "SCNetworkReachabilityFlags.isLocalAddress.rawValue" not in tests
+        or "SCNetworkReachabilityFlags.isDirect.rawValue" not in tests
     ):
         failures.append("tests must cover ancillary flags with and without the Reachable flag")
+    wwan_test = tests.split("func testWWANFlagRequiresReachableBaseFlag()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testWWANFlagRequiresReachableBaseFlag()" not in tests
+        or "#if os(iOS)" not in wwan_test
+        or "SCNetworkReachabilityFlags.isWWAN.rawValue" not in wwan_test
+        or "XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: wwan)))" not in wwan_test
+        or "XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))" not in wwan_test
+        or wwan_test.count("XCTAssertFalse") != 1
+        or wwan_test.count("XCTAssertTrue") != 1
+    ):
+        failures.append("tests must cover WWAN reachability with and without the Reachable flag")
+    truth_table_test = tests.split("func testReachabilityDecisionTruthTable()", 1)[-1].split("\n    func ", 1)[0]
+    if (
+        "func testReachabilityDecisionTruthTable()" not in tests
+        or "let booleanValues = [false, true]" not in truth_table_test
+        or truth_table_test.count("for ") != 5
+        or "for isReachable in booleanValues" not in truth_table_test
+        or "for connectionRequired in booleanValues" not in truth_table_test
+        or "for connectionOnDemand in booleanValues" not in truth_table_test
+        or "for connectionOnTraffic in booleanValues" not in truth_table_test
+        or "for interventionRequired in booleanValues" not in truth_table_test
+        or "SCNetworkReachabilityFlags.reachable.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionRequired.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionOnDemand.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionOnTraffic.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.interventionRequired.rawValue" not in truth_table_test
+        or "let canConnectAutomatically = connectionOnDemand || connectionOnTraffic" not in truth_table_test
+        or "let expected = isReachable &&" not in truth_table_test
+        or "(!connectionRequired || (canConnectAutomatically && !interventionRequired))" not in truth_table_test
+        or "XCTAssertEqual(coveredRows, 32)" not in truth_table_test
+    ):
+        failures.append("tests must cover the complete reachability decision truth table")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
     build = read("build.sh")
-    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
+    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
         if phrase not in build:
             failures.append(f"build.sh must include {phrase}")
     if "function " in build:
         failures.append("build.sh must use POSIX shell function syntax or no shell functions")
 
     makefile = read("Makefile")
-    for phrase in [
-        ".PHONY: build check lint static-check test verify",
-        "check: verify",
-        "lint test build verify: static-check",
-    ]:
-        if phrase not in makefile:
-            failures.append(f"Makefile must include standard gate alias: {phrase}")
+    if makefile != EXPECTED_MAKEFILE:
+        failures.append("Makefile must exactly preserve rooted SDK-free aliases")
 
     podspec = read("NetworkState.podspec")
     podspec_version_match = re.search(r's\.version\s*=\s*"([^"]+)"', podspec)
@@ -170,7 +233,24 @@ def main() -> int:
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 
-    docs = read("README.md") + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
+    readme_source = read("README.md")
+    docs = readme_source + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
+    location_independent_make_plan = read(
+        "docs/plans/2026-06-13-location-independent-make.md"
+    )
+    if "make -f /path/to/NetworkState/Makefile check" not in readme_source:
+        failures.append("README must document location-independent Makefile invocation")
+    if not all(
+        evidence in location_independent_make_plan.lower()
+        for evidence in [
+            "status: completed",
+            "root and external-directory",
+            "five isolated hostile mutations",
+        ]
+    ):
+        failures.append(
+            "location-independent Make plan must record completed root, external, and mutation verification"
+        )
     for phrase in [
         "make check",
         "pod spec lint",
@@ -181,6 +261,7 @@ def main() -> int:
         "requires the reachable flag",
         "combined automatic connection flags",
         "intervention-required flag",
+        "automatic intervention matrix",
         "iOS 8.0",
         "framework version alignment",
         "shared framework scheme",
@@ -190,6 +271,55 @@ def main() -> int:
     ]:
         if phrase not in docs:
             failures.append(f"docs must mention {phrase}")
+    for relative_path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
+        if "wwan reachability flag matrix" not in read(relative_path).lower():
+            failures.append(f"{relative_path} must document the WWAN reachability flag matrix")
+        if "reachability decision truth table" not in read(relative_path).lower():
+            failures.append(f"{relative_path} must document the reachability decision truth table")
+    intervention_scope_guidance = {
+        "README.md": "does not invalidate a route that is already reachable",
+        "SECURITY.md": "only when a required connection still needs user action",
+        "VISION.md": "scoped to connections that must first be established",
+        "CHANGES.md": "preserving already reachable routes that need no connection",
+    }
+    for relative_path, phrase in intervention_scope_guidance.items():
+        if phrase not in " ".join(read(relative_path).split()):
+            failures.append(f"{relative_path} must document intervention-required scope")
+
+    readme = " ".join(read("README.md").split())
+    for phrase in [
+        "synchronous snapshot",
+        "IPv4 default route",
+        "does not prove internet access",
+        "DNS resolution",
+        "captive-portal completion",
+        "availability of a specific service",
+        "legacy compatibility boundary",
+        "CocoaPods is the only declared package-manager integration",
+        "Swift Package Manager and Carthage are unsupported",
+        "no remote probes",
+    ]:
+        if phrase not in readme:
+            failures.append(f"README platform assumptions must mention {phrase}")
+
+    security = " ".join(read("SECURITY.md").split())
+    for phrase in [
+        "local flag snapshot with no remote probes",
+        "must not be documented as proof of internet access",
+        "CocoaPods is the only declared package-manager integration",
+    ]:
+        if phrase not in security:
+            failures.append(f"security platform assumptions must mention {phrase}")
+
+    vision = " ".join(read("VISION.md").split())
+    for phrase in [
+        "iOS 8.0 is a legacy package boundary",
+        "synchronous IPv4 default-route flag snapshot",
+        "CocoaPods as the only declared package-manager integration",
+        "no remote probes",
+    ]:
+        if phrase not in vision:
+            failures.append(f"vision platform assumptions must mention {phrase}")
 
     plan = read("docs/plans/2026-06-08-network-state-baseline.md")
     if "status: completed" not in plan or "make check" not in plan:
@@ -235,9 +365,39 @@ def main() -> int:
     non_reachability_plan = read("docs/plans/2026-06-10-non-reachability-flags.md")
     if "status: completed" not in non_reachability_plan or "make check" not in non_reachability_plan:
         failures.append("non-reachability flag guard plan must record status and verification")
+    automatic_intervention_plan = read("docs/plans/2026-06-12-automatic-intervention-matrix.md")
+    if "status: completed" not in automatic_intervention_plan or "hostile mutations" not in automatic_intervention_plan:
+        failures.append("automatic intervention matrix plan must record completed verification")
+    wwan_plan = read("docs/plans/2026-06-15-wwan-reachability-flag-matrix.md")
+    if (
+        "status: completed" not in wwan_plan
+        or "All four Make gates passed" not in wwan_plan
+        or "Six isolated hostile mutations were rejected" not in wwan_plan
+        or "external directory" not in wwan_plan
+    ):
+        failures.append("WWAN reachability flag matrix plan must record completed verification")
+    truth_table_plan = read("docs/plans/2026-06-15-reachability-decision-truth-table.md")
+    if (
+        "status: completed" not in truth_table_plan.lower()
+        or "All four Make gates passed" not in truth_table_plan
+        or "Seven isolated hostile mutations were rejected" not in truth_table_plan
+        or "external directory" not in truth_table_plan
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", truth_table_plan)
+    ):
+        failures.append("reachability decision truth table plan must record completed verification")
+    intervention_scope_plan = read("docs/plans/2026-06-15-intervention-required-scope.md")
+    if (
+        "status: completed" not in intervention_scope_plan.lower()
+        or "All four Make gates passed" not in intervention_scope_plan
+        or "Six isolated hostile mutations were rejected" not in intervention_scope_plan
+        or "external directory" not in intervention_scope_plan
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", intervention_scope_plan)
+    ):
+        failures.append("intervention-required scope plan must record completed verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
     if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
         failures.append("hosted project validation plan must record status and verification")
     for expected in [
@@ -247,9 +407,49 @@ def main() -> int:
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "run: make check",
+        "run: ./build.sh",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+
+    checkout_plan = read("docs/plans/2026-06-12-checkout-credential-boundary.md")
+    if (
+        "status: completed" not in checkout_plan
+        or "persist-credentials: false" not in checkout_plan
+        or "hostile mutations rejected" not in checkout_plan
+    ):
+        failures.append("checkout credential plan must record completed verification")
+    assumptions_plan = read("docs/plans/2026-06-13-platform-network-assumptions.md")
+    if (
+        "status: completed" not in assumptions_plan
+        or "make check" not in assumptions_plan
+        or "hostile mutations rejected" not in assumptions_plan
+    ):
+        failures.append("platform assumptions plan must record completed verification")
+    workflow_files = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / ".github/workflows").iterdir()
+        if path.is_file()
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("workflow inventory must contain only .github/workflows/check.yml")
+    checkout_step = (
+        "      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10\n"
+        "        with:\n"
+        "          persist-credentials: false"
+    )
+    if workflow.count("actions/checkout@") != 1 or checkout_step not in workflow:
+        failures.append("Check workflow must keep one pinned credential-free checkout step")
+    if "persist-credentials: true" in workflow:
+        failures.append("Check workflow must not persist checkout credentials")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must keep repository-wide owner review")
+    guidance = " ".join(
+        "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
+    ).lower()
+    for phrase in ["checkout credentials are not persisted", "credential-free checkout"]:
+        if phrase not in guidance:
+            failures.append(f"repository guidance must mention {phrase}")
 
     if shutil.which("xcodebuild"):
         result = subprocess.run(

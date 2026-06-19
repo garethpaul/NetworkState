@@ -18,8 +18,8 @@ class NetworkStateTests: XCTestCase {
     }
 
     func testReachabilityFlagEvaluation() {
-        let reachable = UInt32(kSCNetworkFlagsReachable)
-        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let connectionRequired = SCNetworkReachabilityFlags.connectionRequired.rawValue
 
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable)))
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired)))
@@ -27,11 +27,11 @@ class NetworkStateTests: XCTestCase {
     }
 
     func testReachabilityFlagEvaluationAllowsAutomaticConnection() {
-        let reachable = UInt32(kSCNetworkFlagsReachable)
-        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
-        let connectionOnDemand = UInt32(kSCNetworkFlagsConnectionOnDemand)
-        let connectionOnTraffic = UInt32(kSCNetworkFlagsConnectionOnTraffic)
-        let interventionRequired = UInt32(kSCNetworkFlagsInterventionRequired)
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let connectionRequired = SCNetworkReachabilityFlags.connectionRequired.rawValue
+        let connectionOnDemand = SCNetworkReachabilityFlags.connectionOnDemand.rawValue
+        let connectionOnTraffic = SCNetworkReachabilityFlags.connectionOnTraffic.rawValue
+        let interventionRequired = SCNetworkReachabilityFlags.interventionRequired.rawValue
 
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnDemand)))
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnTraffic)))
@@ -39,39 +39,105 @@ class NetworkStateTests: XCTestCase {
     }
 
     func testAutomaticConnectionStillRequiresReachableFlag() {
-        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
-        let connectionOnDemand = UInt32(kSCNetworkFlagsConnectionOnDemand)
-        let connectionOnTraffic = UInt32(kSCNetworkFlagsConnectionOnTraffic)
+        let connectionRequired = SCNetworkReachabilityFlags.connectionRequired.rawValue
+        let connectionOnDemand = SCNetworkReachabilityFlags.connectionOnDemand.rawValue
+        let connectionOnTraffic = SCNetworkReachabilityFlags.connectionOnTraffic.rawValue
 
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: connectionRequired | connectionOnDemand)))
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: connectionRequired | connectionOnTraffic)))
     }
 
     func testCombinedAutomaticConnectionFlagsAreReachable() {
-        let reachable = UInt32(kSCNetworkFlagsReachable)
-        let connectionRequired = UInt32(kSCNetworkFlagsConnectionRequired)
-        let connectionOnDemand = UInt32(kSCNetworkFlagsConnectionOnDemand)
-        let connectionOnTraffic = UInt32(kSCNetworkFlagsConnectionOnTraffic)
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let connectionRequired = SCNetworkReachabilityFlags.connectionRequired.rawValue
+        let connectionOnDemand = SCNetworkReachabilityFlags.connectionOnDemand.rawValue
+        let connectionOnTraffic = SCNetworkReachabilityFlags.connectionOnTraffic.rawValue
 
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | connectionRequired | connectionOnDemand | connectionOnTraffic)))
     }
 
-    func testInterventionRequiredFlagPreventsReachability() {
-        let reachable = UInt32(kSCNetworkFlagsReachable)
-        let interventionRequired = UInt32(kSCNetworkFlagsInterventionRequired)
+    func testInterventionRequiredDoesNotBlockEstablishedReachability() {
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let interventionRequired = SCNetworkReachabilityFlags.interventionRequired.rawValue
 
-        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | interventionRequired)))
+    }
+
+    func testAutomaticConnectionModesRequireNoUserIntervention() {
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let connectionRequired = SCNetworkReachabilityFlags.connectionRequired.rawValue
+        let connectionOnDemand = SCNetworkReachabilityFlags.connectionOnDemand.rawValue
+        let connectionOnTraffic = SCNetworkReachabilityFlags.connectionOnTraffic.rawValue
+        let interventionRequired = SCNetworkReachabilityFlags.interventionRequired.rawValue
+        let requiredFlags = reachable | connectionRequired | interventionRequired
+
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: requiredFlags | connectionOnDemand)))
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: requiredFlags | connectionOnTraffic)))
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: requiredFlags | connectionOnDemand | connectionOnTraffic)))
     }
 
     func testNonReachabilityFlagsDoNotCreateConnectivity() {
-        let reachable = UInt32(kSCNetworkFlagsReachable)
-        let transientConnection = UInt32(kSCNetworkFlagsTransientConnection)
-        let localAddress = UInt32(kSCNetworkFlagsIsLocalAddress)
-        let direct = UInt32(kSCNetworkFlagsIsDirect)
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let transientConnection = SCNetworkReachabilityFlags.transientConnection.rawValue
+        let localAddress = SCNetworkReachabilityFlags.isLocalAddress.rawValue
+        let direct = SCNetworkReachabilityFlags.isDirect.rawValue
         let ancillaryFlags = transientConnection | localAddress | direct
 
         XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: ancillaryFlags)))
         XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | ancillaryFlags)))
+    }
+
+    func testWWANFlagRequiresReachableBaseFlag() {
+#if os(iOS)
+        let reachable = SCNetworkReachabilityFlags.reachable.rawValue
+        let wwan = SCNetworkReachabilityFlags.isWWAN.rawValue
+
+        XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: wwan)))
+        XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))
+#endif
+    }
+
+    func testReachabilityDecisionTruthTable() {
+        let booleanValues = [false, true]
+        var coveredRows = 0
+
+        for isReachable in booleanValues {
+            for connectionRequired in booleanValues {
+                for connectionOnDemand in booleanValues {
+                    for connectionOnTraffic in booleanValues {
+                        for interventionRequired in booleanValues {
+                            var rawValue: UInt32 = 0
+                            if isReachable {
+                                rawValue |= SCNetworkReachabilityFlags.reachable.rawValue
+                            }
+                            if connectionRequired {
+                                rawValue |= SCNetworkReachabilityFlags.connectionRequired.rawValue
+                            }
+                            if connectionOnDemand {
+                                rawValue |= SCNetworkReachabilityFlags.connectionOnDemand.rawValue
+                            }
+                            if connectionOnTraffic {
+                                rawValue |= SCNetworkReachabilityFlags.connectionOnTraffic.rawValue
+                            }
+                            if interventionRequired {
+                                rawValue |= SCNetworkReachabilityFlags.interventionRequired.rawValue
+                            }
+
+                            let canConnectAutomatically = connectionOnDemand || connectionOnTraffic
+                            let expected = isReachable &&
+                                (!connectionRequired || (canConnectAutomatically && !interventionRequired))
+                            XCTAssertEqual(
+                                NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: rawValue)),
+                                expected
+                            )
+                            coveredRows += 1
+                        }
+                    }
+                }
+            }
+        }
+
+        XCTAssertEqual(coveredRows, 32)
     }
 
 }

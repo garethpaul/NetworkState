@@ -26,21 +26,37 @@ Helpful reports include:
 
 - This repository appears to be an Apple platform application or Swift sample. The active security scope is the code and documentation on the default branch.
 - The core code uses `SystemConfiguration` reachability. Connectivity checks should remain local to the device and should not collect telemetry, browsing data, endpoint history, or packet contents.
+- Reachability must remain a local flag snapshot with no remote probes. A
+  positive result must not be documented as proof of internet access, DNS,
+  captive-portal completion, or availability of a specific service.
+- The helper installs no reachability callback and owns no callback queue,
+  observer, or teardown lifecycle; callers must request a fresh snapshot when
+  their own application lifecycle requires one.
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.
 - Combined automatic connection flags should stay covered so on-demand and
   on-traffic states remain accepted together when reachable.
 - The intervention-required flag should prevent connectivity from being
-  reported when the network state still needs user action.
+  reported only when a required connection still needs user action; it should
+  not override an already established reachable route.
+- The automatic intervention matrix should cover on-demand, on-traffic, and
+  combined automatic modes with user intervention required.
 - The non-reachability flag guard should ensure ancillary route flags cannot
   report connectivity without the `Reachable` bit.
+- The WWAN reachability flag matrix should keep the cellular bit dependent on
+  `Reachable` without rejecting valid reachable cellular routes.
+- The reachability decision truth table should cover every boolean combination
+  that controls the public flag evaluator.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - CocoaPods metadata lives in `NetworkState.podspec`. Run `make lint`,
   `make test`, `make build`, `make check`, and
   `pod spec lint NetworkState.podspec` before publishing package metadata
   changes.
+- CocoaPods is the only declared package-manager integration. Swift Package
+  Manager and Carthage support require separate metadata and verification
+  before being advertised.
 - The pinned macOS workflow runs static checks and project parsing without
   simulator execution, signing, pod publishing, or runtime connectivity checks.
 - The Xcode project and podspec should stay aligned on iOS 8.0 support so consumers do not receive inconsistent package metadata.
@@ -61,6 +77,9 @@ For this repository, keep signing identities, local xcconfig files, `.env`
 files, and generated build products out of git. Preserve the shared framework
 scheme when changing project metadata so package verification remains
 repeatable.
+
+The hosted gate uses a credential-free checkout so its read-only token is not
+retained in the runner's Git configuration.
 
 ## Safe Research Guidelines
 

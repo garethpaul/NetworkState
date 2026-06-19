@@ -1,7 +1,41 @@
 # Changes
 
+## 2026-06-19
+
+- Made the reachability truth table executable on current Xcode while retaining
+  the legacy Boolean API and iOS 8 package declaration.
+- Expanded automatic-mode coverage to distinguish on-demand, on-traffic, and
+  combined flags across all 32 core decision rows.
+- Added repository ownership guidance and a credential-free hosted native gate.
+
+## 2026-06-15
+
+- Added a WWAN reachability flag matrix covering the cellular bit with and
+  without the required `Reachable` flag.
+- Added a reachability decision truth table for the flags that control the
+  public evaluator.
+- Scoped intervention-required handling to connections that must first be
+  established, preserving already reachable routes that need no connection.
+
+## 2026-06-13
+
+- Made every SDK-free Make alias resolve the static checker from the checkout
+  when the Makefile is invoked by absolute path.
+- Documented the synchronous IPv4 default-route reachability semantics, the
+  request-level failures callers must still handle, the legacy iOS 8.0
+  compatibility boundary, and CocoaPods-only package support.
+- Enforced the local-only, no-remote-probe documentation contract in the static
+  baseline.
+
+## 2026-06-12
+
+- Disabled persisted checkout credentials and enforced the sole pinned
+  credential-free workflow boundary.
+
 ## 2026-06-10
 
+- Added an automatic intervention matrix covering on-demand, on-traffic, and
+  combined automatic connection flags while user action is required.
 - Added a non-reachability flag guard covering transient, local-address, and
   direct-route bits with and without the `Reachable` flag.
 - Added pinned, read-only macOS hosted validation for the SDK-free baseline and

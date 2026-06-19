@@ -23,8 +23,12 @@ Priority:
 - Keep automatic connection reachability flags covered without live network state
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests
-- Keep the intervention-required flag from reporting connectivity
+- Keep intervention-required handling scoped to connections that must first be
+  established
+- Keep the automatic intervention matrix across every automatic connection mode
 - Keep the non-reachability flag guard around ancillary route flags
+- Keep the WWAN reachability flag matrix around cellular routes
+- Keep the reachability decision truth table exhaustive across decision flags
 - Avoid growing the library beyond focused reachability utilities
 - Keep `SystemConfiguration` checks local to the device
 - Keep simulator verification independent of local signing identities by
@@ -37,13 +41,21 @@ Priority:
   SDK-free static baseline
 - Keep hosted macOS project parsing pinned, read-only, and separate from the
   legacy simulator build
+- Keep hosted source retrieval credential-free after checkout
+- Keep the platform contract explicit: iOS 8.0 is a legacy package boundary,
+  not a current-Xcode compatibility claim
+- Keep reachability documented as a synchronous IPv4 default-route flag
+  snapshot with no callback scheduling or observer lifecycle, rather than proof
+  of internet or service availability
+- Keep CocoaPods as the only declared package-manager integration until another
+  manager is added and verified in a focused change
+- Keep connectivity evaluation local to the device with no remote probes,
+  telemetry, or endpoint checks
 
 Next priorities:
 
-- Document platform and network-framework assumptions
 - Modernize Swift/project settings in a dedicated pass
 - Add tests for offline, online, and constrained network cases where practical
-- Clarify package-manager support if revived
 - Run `pod spec lint NetworkState.podspec` on macOS before any package release
 
 Contribution rules:
@@ -59,6 +71,7 @@ Contribution rules:
 - Preserve combined automatic connection flags coverage when changing flag logic.
 - Preserve intervention-required flag handling when changing reachability logic.
 - Preserve the non-reachability flag guard when changing ancillary flag logic.
+- Preserve the WWAN reachability flag matrix when changing cellular flag logic.
 - Preserve deployment target alignment when changing package metadata.
 - Preserve framework version alignment when changing release metadata.
 - Preserve the shared framework scheme when changing Xcode project metadata.

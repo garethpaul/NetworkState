@@ -62,11 +62,21 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Automatic connection handling still requires the reachable flag, so connection-on-demand flags alone do not report connectivity.
 - Combined automatic connection flags remain reachable when the base reachable
   flag is present and no user intervention is required.
-- The intervention-required flag prevents reachability even when the base
-  reachable flag is present.
+- The intervention-required flag prevents an automatic required connection
+  from being treated as reachable, but does not invalidate a route that is
+  already reachable without establishing a connection.
+- The automatic intervention matrix covers on-demand, on-traffic, and combined
+  automatic modes so none report connectivity while user action is required.
 - The non-reachability flag guard verifies transient, local-address, and direct
   bits cannot create connectivity without the `Reachable` flag.
+- The WWAN reachability flag matrix verifies the cellular bit cannot create
+  connectivity alone and remains accepted with `Reachable`.
+- The reachability decision truth table covers every combination of reachable,
+  connection-required, automatic-connect, and intervention-required state.
 - Open `NetworkState.xcodeproj` in Xcode and run the `NetworkStateTests` scheme.
+- The Make gates are location-independent. From another directory, pass the
+  checkout's Makefile by absolute path, such as
+  `make -f /path/to/NetworkState/Makefile check`.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
@@ -77,8 +87,25 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   available to Xcode consumers alongside the test scheme.
 
 ```bash
-DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
+DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
 ```
+
+## Platform, Packaging, And Reachability Assumptions
+
+- `isConnectedToNetwork()` is a synchronous snapshot of
+  `SCNetworkReachability` flags for the IPv4 default route. It does not monitor
+  later network changes, install callbacks, schedule run-loop work, or own any
+  callback lifecycle.
+- A `true` result does not prove internet access, DNS resolution, captive-portal
+  completion, or availability of a specific service. Callers must still handle
+  request-level failures and timeouts.
+- The podspec declares iOS 8.0 because this is a legacy compatibility boundary,
+  not a claim that the project builds unchanged with current Xcode or Swift.
+- CocoaPods is the only declared package-manager integration. Swift Package
+  Manager and Carthage are unsupported unless added in a separate reviewed
+  change.
+- The helper evaluates local SystemConfiguration state only. It performs no
+  remote probes, telemetry, request logging, or endpoint availability checks.
 
 ## Testing and Verification
 
@@ -88,7 +115,8 @@ DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
 - `make check`
 - Pinned `macos-15` GitHub Actions runs the SDK-free baseline and parses
   `NetworkState.xcodeproj` without simulator execution, signing, pod
-  publishing, or runtime connectivity checks.
+  publishing, or runtime connectivity checks. Checkout credentials are not
+  persisted after source retrieval.
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 - XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.
@@ -112,9 +140,14 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Automatic connection behavior should keep the rule that it requires the reachable flag.
 - Combined automatic connection flags should stay covered so on-demand and
   on-traffic states remain accepted together.
-- The intervention-required flag should keep user-action states from reporting
-  connected.
+- The intervention-required flag should keep required connections that still
+  need user action from reporting connected without invalidating an already
+  established route.
+- The automatic intervention matrix should keep every automatic connection mode
+  unreachable while intervention is required.
 - Preserve the non-reachability flag guard when adding ancillary flag handling.
+- Preserve the WWAN reachability flag matrix when changing cellular handling.
+- Preserve the reachability decision truth table when changing flag logic.
 - Review changes touching network requests, sockets, telemetry, or service endpoints; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include NetworkState/Info.plist, NetworkStateTests/Info.plist.
 
@@ -124,6 +157,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   changes, then run Xcode and CocoaPods verification on macOS when package
   metadata or Swift behavior changes.
+- Use an absolute Makefile path when running those gates outside the checkout.
 - Keep `NetworkState.podspec` and Xcode deployment targets aligned so package metadata does not claim unsupported iOS versions.
 - Keep framework version alignment between `NetworkState/Info.plist` and
   `NetworkState.podspec` before publishing package metadata.
