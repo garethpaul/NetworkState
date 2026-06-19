@@ -17,3 +17,4 @@ jobs:
         with:
           persist-credentials: false
       - run: make check
+      - run: ./build.sh

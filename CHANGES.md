@@ -1,11 +1,19 @@
 # Changes
 
+## 2026-06-19
+
+- Made the reachability truth table executable on current Xcode while retaining
+  the legacy Boolean API and iOS 8 package declaration.
+- Expanded automatic-mode coverage to distinguish on-demand, on-traffic, and
+  combined flags across all 32 core decision rows.
+- Added repository ownership guidance and a credential-free hosted native gate.
+
 ## 2026-06-15
 
 - Added a WWAN reachability flag matrix covering the cellular bit with and
   without the required `Reachable` flag.
-- Added a reachability decision truth table covering all 16 combinations of the
-  four flags that control the public evaluator.
+- Added a reachability decision truth table for the flags that control the
+  public evaluator.
 - Scoped intervention-required handling to connections that must first be
   established, preserving already reachable routes that need no connection.
 

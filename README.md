@@ -87,14 +87,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   available to Xcode consumers alongside the test scheme.
 
 ```bash
-DESTINATION='platform=iOS Simulator,name=iPhone 6' ./build.sh
+DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
 ```
 
 ## Platform, Packaging, And Reachability Assumptions
 
 - `isConnectedToNetwork()` is a synchronous snapshot of
   `SCNetworkReachability` flags for the IPv4 default route. It does not monitor
-  later network changes.
+  later network changes, install callbacks, schedule run-loop work, or own any
+  callback lifecycle.
 - A `true` result does not prove internet access, DNS resolution, captive-portal
   completion, or availability of a specific service. Callers must still handle
   request-level failures and timeouts.
@@ -139,8 +140,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Automatic connection behavior should keep the rule that it requires the reachable flag.
 - Combined automatic connection flags should stay covered so on-demand and
   on-traffic states remain accepted together.
-- The intervention-required flag should keep user-action states from reporting
-  connected.
+- The intervention-required flag should keep required connections that still
+  need user action from reporting connected without invalidating an already
+  established route.
 - The automatic intervention matrix should keep every automatic connection mode
   unreachable while intervention is required.
 - Preserve the non-reachability flag guard when adding ancillary flag handling.

@@ -45,7 +45,8 @@ Priority:
 - Keep the platform contract explicit: iOS 8.0 is a legacy package boundary,
   not a current-Xcode compatibility claim
 - Keep reachability documented as a synchronous IPv4 default-route flag
-  snapshot rather than proof of internet or service availability
+  snapshot with no callback scheduling or observer lifecycle, rather than proof
+  of internet or service availability
 - Keep CocoaPods as the only declared package-manager integration until another
   manager is added and verified in a focused change
 - Keep connectivity evaluation local to the device with no remote probes,

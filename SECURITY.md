@@ -29,6 +29,9 @@ Helpful reports include:
 - Reachability must remain a local flag snapshot with no remote probes. A
   positive result must not be documented as proof of internet access, DNS,
   captive-portal completion, or availability of a specific service.
+- The helper installs no reachability callback and owns no callback queue,
+  observer, or teardown lifecycle; callers must request a fresh snapshot when
+  their own application lifecycle requires one.
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.

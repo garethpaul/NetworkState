@@ -11,11 +11,13 @@ import SystemConfiguration
 public class NetworkState {
     public class func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(sizeofValue(zeroAddress))
+        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
         zeroAddress.sin_family = sa_family_t(AF_INET)
 
-        let defaultRouteReachability = withUnsafePointer(&zeroAddress) {
-            SCNetworkReachabilityCreateWithAddress(nil, UnsafePointer($0))
+        let defaultRouteReachability = withUnsafePointer(to: &zeroAddress) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                SCNetworkReachabilityCreateWithAddress(nil, $0)
+            }
         }
 
         guard let reachability = defaultRouteReachability else {
@@ -29,12 +31,12 @@ public class NetworkState {
         return isReachableWithFlags(flags)
     }
 
-    public class func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool {
-        let isReachable = (flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0
-        let needsConnection = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionRequired)) != 0
-        let canConnectAutomatically = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionOnDemand)) != 0 ||
-            (flags.rawValue & UInt32(kSCNetworkFlagsConnectionOnTraffic)) != 0
-        let interventionRequired = (flags.rawValue & UInt32(kSCNetworkFlagsInterventionRequired)) != 0
+    public class func isReachableWithFlags(_ flags: SCNetworkReachabilityFlags) -> Bool {
+        let isReachable = flags.contains(.reachable)
+        let needsConnection = flags.contains(.connectionRequired)
+        let canConnectAutomatically = flags.contains(.connectionOnDemand) ||
+            flags.contains(.connectionOnTraffic)
+        let interventionRequired = flags.contains(.interventionRequired)
         let canConnectWithoutUserInteraction = canConnectAutomatically && !interventionRequired
 
         return isReachable && (!needsConnection || canConnectWithoutUserInteraction)

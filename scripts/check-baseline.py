@@ -24,8 +24,10 @@ static-check:
 """
 REQUIRED = [
     ".gitignore",
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     ".travis.yml",
+    "AGENTS.md",
     "CHANGES.md",
     "Makefile",
     "NetworkState.podspec",
@@ -80,15 +82,15 @@ def main() -> int:
         failures.append("reachability creation must be guarded")
     if "defaultRouteReachability!" in swift:
         failures.append("reachability must not be force-unwrapped")
-    if "public class func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool" not in swift:
+    if "public class func isReachableWithFlags(_ flags: SCNetworkReachabilityFlags) -> Bool" not in swift:
         failures.append("reachability flag evaluation must be exposed for fixture tests")
     if "return isReachableWithFlags(flags)" not in swift:
         failures.append("isConnectedToNetwork must use the shared flag evaluator")
     for phrase in [
         "canConnectAutomatically",
-        "kSCNetworkFlagsConnectionOnDemand",
-        "kSCNetworkFlagsConnectionOnTraffic",
-        "kSCNetworkFlagsInterventionRequired",
+        "flags.contains(.connectionOnDemand)",
+        "flags.contains(.connectionOnTraffic)",
+        "flags.contains(.interventionRequired)",
     ]:
         if phrase not in swift:
             failures.append(f"reachability flag evaluation must handle {phrase}")
@@ -98,7 +100,7 @@ def main() -> int:
         failures.append("reachability evaluation must scope intervention to required connections")
     if "return isReachable && !interventionRequired" in swift:
         failures.append("reachability evaluation must not apply intervention as a global veto")
-    if "(flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0" not in swift:
+    if "flags.contains(.reachable)" not in swift:
         failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
     tests = read("NetworkStateTests/NetworkStateTests.swift")
@@ -133,15 +135,16 @@ def main() -> int:
         failures.append("tests must cover intervention across every automatic connection mode")
     if (
         "testNonReachabilityFlagsDoNotCreateConnectivity" not in tests
-        or "kSCNetworkFlagsTransientConnection" not in tests
-        or "kSCNetworkFlagsIsLocalAddress" not in tests
-        or "kSCNetworkFlagsIsDirect" not in tests
+        or "SCNetworkReachabilityFlags.transientConnection.rawValue" not in tests
+        or "SCNetworkReachabilityFlags.isLocalAddress.rawValue" not in tests
+        or "SCNetworkReachabilityFlags.isDirect.rawValue" not in tests
     ):
         failures.append("tests must cover ancillary flags with and without the Reachable flag")
     wwan_test = tests.split("func testWWANFlagRequiresReachableBaseFlag()", 1)[-1].split("\n    func ", 1)[0]
     if (
         "func testWWANFlagRequiresReachableBaseFlag()" not in tests
-        or "kSCNetworkFlagsIsWWAN" not in wwan_test
+        or "#if os(iOS)" not in wwan_test
+        or "SCNetworkReachabilityFlags.isWWAN.rawValue" not in wwan_test
         or "XCTAssertFalse(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: wwan)))" not in wwan_test
         or "XCTAssertTrue(NetworkState.isReachableWithFlags(SCNetworkReachabilityFlags(rawValue: reachable | wwan)))" not in wwan_test
         or wwan_test.count("XCTAssertFalse") != 1
@@ -152,25 +155,28 @@ def main() -> int:
     if (
         "func testReachabilityDecisionTruthTable()" not in tests
         or "let booleanValues = [false, true]" not in truth_table_test
-        or truth_table_test.count("for ") != 4
+        or truth_table_test.count("for ") != 5
         or "for isReachable in booleanValues" not in truth_table_test
         or "for connectionRequired in booleanValues" not in truth_table_test
-        or "for canConnectAutomatically in booleanValues" not in truth_table_test
+        or "for connectionOnDemand in booleanValues" not in truth_table_test
+        or "for connectionOnTraffic in booleanValues" not in truth_table_test
         or "for interventionRequired in booleanValues" not in truth_table_test
-        or "kSCNetworkFlagsReachable" not in truth_table_test
-        or "kSCNetworkFlagsConnectionRequired" not in truth_table_test
-        or "kSCNetworkFlagsConnectionOnDemand" not in truth_table_test
-        or "kSCNetworkFlagsInterventionRequired" not in truth_table_test
+        or "SCNetworkReachabilityFlags.reachable.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionRequired.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionOnDemand.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.connectionOnTraffic.rawValue" not in truth_table_test
+        or "SCNetworkReachabilityFlags.interventionRequired.rawValue" not in truth_table_test
+        or "let canConnectAutomatically = connectionOnDemand || connectionOnTraffic" not in truth_table_test
         or "let expected = isReachable &&" not in truth_table_test
         or "(!connectionRequired || (canConnectAutomatically && !interventionRequired))" not in truth_table_test
-        or "XCTAssertEqual(coveredRows, 16)" not in truth_table_test
+        or "XCTAssertEqual(coveredRows, 32)" not in truth_table_test
     ):
         failures.append("tests must cover the complete reachability decision truth table")
     if "testExample" in tests or "testPerformanceExample" in tests:
         failures.append("placeholder XCTest methods must be replaced")
 
     build = read("build.sh")
-    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
+    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
         if phrase not in build:
             failures.append(f"build.sh must include {phrase}")
     if "function " in build:
@@ -391,6 +397,7 @@ def main() -> int:
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-project-validation.md")
     workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
     if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
         failures.append("hosted project validation plan must record status and verification")
     for expected in [
@@ -400,6 +407,7 @@ def main() -> int:
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "run: make check",
+        "run: ./build.sh",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
@@ -434,6 +442,8 @@ def main() -> int:
         failures.append("Check workflow must keep one pinned credential-free checkout step")
     if "persist-credentials: true" in workflow:
         failures.append("Check workflow must not persist checkout credentials")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must keep repository-wide owner review")
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
     ).lower()
