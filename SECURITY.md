@@ -86,16 +86,18 @@ project check directly before entering any mutable Make target. This prevents
 duplicate `ROOT` assignments, recipe replacement, or caller shell settings from
 claiming successful policy validation. Local Make aliases remain convenience
 commands for the checked-in Makefile, not authority over arbitrary
-caller-supplied Make programs. They pin `/bin/sh` and `/usr/bin/python3`, and
-they fail closed for the reviewed fake `python3`, command-line and `MAKEFLAGS`
-`SHELL`, `ROOT`, and `MAKEFILE_LIST` controls. Additional `-f` Makefiles are
-caller-supplied Make programs outside the local Make trust boundary; the hosted
-direct workflow remains authoritative for pull-request validation.
+caller-supplied Make programs. They pin `/bin/sh` and isolated
+`/usr/bin/python3 -I -B` processes, and they fail closed for the reviewed fake
+`python3`, `PYTHONPATH` startup code, command-line and `MAKEFLAGS` `SHELL`,
+`ROOT`, and `MAKEFILE_LIST` controls. Additional `-f` Makefiles are caller-supplied
+Make programs outside the local Make trust boundary; the hosted direct workflow
+remains authoritative for pull-request validation.
 
 The workflow contract permits only the pinned checkout and exact validation
 step, with no job/step environment, custom shell, extra step, or command
-addition. Hosted Python, shell, and `xcodebuild` entrypoints use absolute system
-paths so checked-in or `PATH`-injected replacements cannot claim success.
+addition. Hosted Python runs isolated from `PYTHONPATH` and user-site startup
+code. Python, shell, and `xcodebuild` entrypoints use absolute system paths so
+checked-in or `PATH`-injected replacements cannot claim success.
 
 The workflow itself is pull-request editable. Branch protection must require
 the GitHub Actions `baseline` context, and workflow changes require review as

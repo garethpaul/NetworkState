@@ -31,8 +31,8 @@ check: verify
 lint test build verify: static-check
 
 static-check:
-\t/usr/bin/python3 "$(ROOT)/scripts/check-baseline.py"
-\tPYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
+\t/usr/bin/python3 -I -B "$(ROOT)/scripts/check-baseline.py"
+\t/usr/bin/python3 -I -B -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
 """
 EXPECTED_WORKFLOW = """name: Check
 on:
@@ -53,8 +53,8 @@ jobs:
         with:
           persist-credentials: false
       - run: |
-          /usr/bin/python3 scripts/check-baseline.py
-          PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m unittest discover -s tests -p 'test_*.py'
+          /usr/bin/python3 -I -B scripts/check-baseline.py
+          /usr/bin/python3 -I -B -m unittest discover -s tests -p 'test_*.py'
           /bin/sh ./build.sh
 """
 REQUIRED = [

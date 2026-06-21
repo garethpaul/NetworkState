@@ -13,6 +13,8 @@
   regression coverage and an explicit required-context trust boundary.
 - Required the exact hosted workflow and absolute Python, shell, and Xcode tool
   paths, rejecting environment, step, shell, command, and fake-tool shadowing.
+- Isolated local and hosted Python from `PYTHONPATH`, user-site startup code,
+  and bytecode writes so injected startup modules cannot claim successful gates.
 
 ## 2026-06-19
 

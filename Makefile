@@ -18,5 +18,5 @@ check: verify
 lint test build verify: static-check
 
 static-check:
-	/usr/bin/python3 "$(ROOT)/scripts/check-baseline.py"
-	PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
+	/usr/bin/python3 -I -B "$(ROOT)/scripts/check-baseline.py"
+	/usr/bin/python3 -I -B -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'

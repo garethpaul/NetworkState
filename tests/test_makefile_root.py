@@ -232,6 +232,54 @@ class MakefileRootTests(unittest.TestCase):
                     self.assertIn("REAL_PYTHON_TESTS", result.stdout)
                     self.assertFalse(fake_python_log.exists(), fake_python_log.read_text() if fake_python_log.exists() else "")
 
+    def test_python_entrypoints_ignore_pythonpath_startup_code(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory(prefix="networkstate pythonpath ") as directory:
+            root = Path(directory)
+            checkout = root / "checkout"
+            startup = root / "startup"
+            checkout.mkdir()
+            startup.mkdir()
+            self.write_hosted_fixture(checkout, makefile)
+            marker = root / "sitecustomize-ran"
+            (startup / "sitecustomize.py").write_text(
+                "import os\n"
+                "from pathlib import Path\n"
+                "Path(os.environ['NETWORKSTATE_STARTUP_MARKER']).write_text('ran\\n')\n"
+                "os._exit(0)\n",
+                encoding="utf-8",
+            )
+            environment = os.environ.copy()
+            environment["PYTHONPATH"] = str(startup)
+            environment["NETWORKSTATE_STARTUP_MARKER"] = str(marker)
+
+            make_result = subprocess.run(
+                ["make", "--no-print-directory", "-f", str(checkout / "Makefile"), "check"],
+                cwd=root,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(0, make_result.returncode, make_result.stderr)
+            self.assertIn("REAL_HOSTED_POLICY", make_result.stdout)
+            self.assertIn("REAL_PYTHON_TESTS", make_result.stdout)
+            self.assertFalse(marker.exists())
+
+            hosted_result = subprocess.run(
+                ["/bin/sh", "-e", "-c", self.hosted_commands()],
+                cwd=checkout,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(0, hosted_result.returncode, hosted_result.stderr)
+            self.assertIn("REAL_HOSTED_POLICY", hosted_result.stdout)
+            self.assertIn("REAL_PYTHON_TESTS", hosted_result.stdout)
+            self.assertIn("REAL_PROJECT_CHECK", hosted_result.stdout)
+            self.assertFalse(marker.exists())
+
     def test_make_aliases_do_not_trust_command_line_or_makeflags_shell(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         targets = ("check", "lint", "static-check", "test", "build", "verify")
@@ -374,7 +422,7 @@ class MakefileRootTests(unittest.TestCase):
                         mutated_workflow, encoding="utf-8"
                     )
                     result = subprocess.run(
-                        ["/usr/bin/python3", "scripts/check-baseline.py"],
+                        ["/usr/bin/python3", "-I", "-B", "scripts/check-baseline.py"],
                         cwd=checkout,
                         capture_output=True,
                         text=True,

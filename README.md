@@ -80,9 +80,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Absolute Makefile paths containing spaces, brackets, or apostrophes retain
   the complete checkout root. `ROOT` overrides are ignored, and attempts to
   override GNU Make's `MAKEFILE_LIST` metadata fail closed.
-- Local Make aliases pin `/bin/sh` shell execution and `/usr/bin/python3` for
-  the checked-in Makefile. Additional `-f` Makefiles are caller-supplied Make
-  programs outside the local Make trust boundary.
+- Local Make aliases pin `/bin/sh` shell execution and isolated
+  `/usr/bin/python3 -I -B` processes for the checked-in Makefile. Additional
+  `-f` Makefiles are caller-supplied Make programs outside the local Make trust
+  boundary.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
@@ -132,9 +133,9 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
   for pull-request validation.
 - The reviewed workflow is exact: one pinned credential-free checkout and one
   validation step, with no job/step environment, custom shell, extra step, or
-  command addition. Hosted Python and shell entrypoints and `xcodebuild` use
-  absolute system paths, so repository or `PATH` shadowing cannot claim native
-  validation.
+  command addition. Hosted Python runs isolated from `PYTHONPATH` and user-site
+  startup code, while Python, shell, and `xcodebuild` use absolute system paths,
+  so repository or `PATH` shadowing cannot claim native validation.
 - The workflow is pull-request editable. Branch protection must continue to
   require the GitHub Actions `baseline` context, and reviewers must treat
   workflow changes as changes to verification authority. Repository code cannot
