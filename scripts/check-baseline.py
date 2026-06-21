@@ -2,19 +2,27 @@
 """Static baseline checks for the legacy NetworkState Swift framework."""
 
 from pathlib import Path
+import os
 import plistlib
 import re
-import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_MAKEFILE = """ifneq ($(origin MAKEFILE_LIST),file)
+EXPECTED_MAKEFILE = """override SHELL := /bin/sh
+override .SHELLFLAGS := -eu -c
+override HASH := \\#
+
+ifneq ($(origin MAKEFILE_LIST),file)
 $(error MAKEFILE_LIST must not be overridden)
 endif
-override ROOT := $(shell path='$(subst ','"'"',$(MAKEFILE_LIST))'; path=$$(printf '%s\\n' "$$path" | sed 's/^ //'); dirname -- "$$path")
+override MAKEFILE_PATH := $(shell path='$(subst ','"'"',$(MAKEFILE_LIST))'; first=$${path%"$${path$(HASH)?}"}; if [ "$$first" = " " ]; then path=$${path$(HASH)?}; fi; if [ -f "$$path" ]; then printf '%s\\n' "$$path"; fi)
+ifeq ($(MAKEFILE_PATH),)
+$(error this Makefile must be invoked directly as the checked-in Makefile)
+endif
+override ROOT := $(shell path='$(subst ','"'"',$(MAKEFILE_PATH))'; root=$${path%/*}; if [ "$$root" = "$$path" ]; then root=.; fi; if [ -z "$$root" ]; then root=/; fi; printf '%s\\n' "$$root")
 
 .PHONY: build check lint static-check test verify
 
@@ -23,8 +31,31 @@ check: verify
 lint test build verify: static-check
 
 static-check:
-\tpython3 "$(ROOT)/scripts/check-baseline.py"
-\tPYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
+\t/usr/bin/python3 -I -B "$(ROOT)/scripts/check-baseline.py"
+\t/usr/bin/python3 -I -B -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
+"""
+EXPECTED_WORKFLOW = """name: Check
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  baseline:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - run: |
+          /usr/bin/python3 -I -B scripts/check-baseline.py
+          /usr/bin/python3 -I -B -m unittest discover -s tests -p 'test_*.py'
+          /bin/sh ./build.sh
 """
 REQUIRED = [
     ".gitignore",
@@ -182,7 +213,7 @@ def main() -> int:
         failures.append("placeholder XCTest methods must be replaced")
 
     build = read("build.sh")
-    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
+    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", "XCODEBUILD=/usr/bin/xcodebuild", '[ ! -x "$XCODEBUILD" ]', 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"']:
         if phrase not in build:
             failures.append(f"build.sh must include {phrase}")
     if "function " in build:
@@ -265,6 +296,35 @@ def main() -> int:
         "all six Make aliases",
     ]):
         failures.append("spaced Makefile path plan must preserve hostile-path and override verification")
+    make_contract_docs = "\n".join(
+        read(path)
+        for path in [
+            "README.md",
+            "SECURITY.md",
+            "AGENTS.md",
+            "CHANGES.md",
+            "docs/plans/2026-06-21-spaced-makefile-path.md",
+        ]
+    )
+    for phrase in [
+        "`/bin/sh`",
+        "`/usr/bin/python3`",
+        "additional `-f` Makefiles are caller-supplied Make programs",
+        "outside the local Make trust boundary",
+        "hosted direct workflow remains authoritative",
+        "fake `python3`",
+        "`MAKEFLAGS` `SHELL`",
+    ]:
+        if phrase not in make_contract_docs:
+            failures.append(f"Make trust-boundary docs must mention {phrase}")
+    for overclaim in [
+        "reject additional `-f`",
+        "additional `-f` Makefiles before",
+        "recipe replacement were rejected",
+        "before a replaced recipe can claim success",
+    ]:
+        if overclaim in make_contract_docs:
+            failures.append(f"Make trust-boundary docs must not overclaim: {overclaim}")
     for phrase in [
         "make check",
         "pod spec lint",
@@ -420,11 +480,11 @@ def main() -> int:
         "runs-on: macos-15",
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
-        "run: make check",
-        "run: ./build.sh",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+    if workflow != EXPECTED_WORKFLOW:
+        failures.append("Check workflow must preserve the exact reviewed workflow")
 
     checkout_plan = read("docs/plans/2026-06-12-checkout-credential-boundary.md")
     if (
@@ -465,9 +525,10 @@ def main() -> int:
         if phrase not in guidance:
             failures.append(f"repository guidance must mention {phrase}")
 
-    if shutil.which("xcodebuild"):
+    xcodebuild = Path("/usr/bin/xcodebuild")
+    if xcodebuild.is_file() and os.access(xcodebuild, os.X_OK):
         result = subprocess.run(
-            ["xcodebuild", "-list", "-project", "NetworkState.xcodeproj"],
+            [str(xcodebuild), "-list", "-project", "NetworkState.xcodeproj"],
             cwd=ROOT,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,

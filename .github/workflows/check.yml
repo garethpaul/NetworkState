@@ -16,5 +16,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           persist-credentials: false
-      - run: make check
-      - run: ./build.sh
+      - run: |
+          /usr/bin/python3 -I -B scripts/check-baseline.py
+          /usr/bin/python3 -I -B -m unittest discover -s tests -p 'test_*.py'
+          /bin/sh ./build.sh

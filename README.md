@@ -80,6 +80,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Absolute Makefile paths containing spaces, brackets, or apostrophes retain
   the complete checkout root. `ROOT` overrides are ignored, and attempts to
   override GNU Make's `MAKEFILE_LIST` metadata fail closed.
+- Local Make aliases pin `/bin/sh` shell execution and isolated
+  `/usr/bin/python3 -I -B` processes for the checked-in Makefile. Additional
+  `-f` Makefiles are caller-supplied Make programs outside the local Make trust
+  boundary.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
@@ -120,6 +124,22 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
   `NetworkState.xcodeproj` without simulator execution, signing, pod
   publishing, or runtime connectivity checks. Checkout credentials are not
   persisted after source retrieval.
+- Hosted validation invokes `scripts/check-baseline.py`, the Python policy
+  tests, and `build.sh` directly and in that order. It does not trust Make
+  targets, `ROOT`, or caller shell settings as its bootstrap. Local Make aliases
+  remain convenience entrypoints for the checked-in Makefile; they reject the
+  reviewed fake `python3`, command-line and `MAKEFLAGS` `SHELL`, `ROOT`, and
+  `MAKEFILE_LIST` controls. The hosted direct workflow remains authoritative
+  for pull-request validation.
+- The reviewed workflow is exact: one pinned credential-free checkout and one
+  validation step, with no job/step environment, custom shell, extra step, or
+  command addition. Hosted Python runs isolated from `PYTHONPATH` and user-site
+  startup code, while Python, shell, and `xcodebuild` use absolute system paths,
+  so repository or `PATH` shadowing cannot claim native validation.
+- The workflow is pull-request editable. Branch protection must continue to
+  require the GitHub Actions `baseline` context, and reviewers must treat
+  workflow changes as changes to verification authority. Repository code cannot
+  enforce those provider-side settings by itself.
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 - XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.

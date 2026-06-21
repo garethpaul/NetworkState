@@ -4,7 +4,17 @@
 
 - Preserved the complete checkout root for absolute Makefile paths containing
   spaces, brackets, or apostrophes, and rejected `MAKEFILE_LIST` overrides.
+- Hardened every checked-in public Make alias with `/bin/sh` and
+  `/usr/bin/python3`, while documenting that additional `-f` Makefiles are
+  caller-supplied Make programs outside the local Make trust boundary.
 - Added three SDK-free regression tests across all six Make aliases.
+- Moved the hosted policy, Python test, and Xcode project bootstrap outside
+  mutable Make target, `ROOT`, and shell authority, with hostile hosted-equivalent
+  regression coverage and an explicit required-context trust boundary.
+- Required the exact hosted workflow and absolute Python, shell, and Xcode tool
+  paths, rejecting environment, step, shell, command, and fake-tool shadowing.
+- Isolated local and hosted Python from `PYTHONPATH`, user-site startup code,
+  and bytecode writes so injected startup modules cannot claim successful gates.
 
 ## 2026-06-19
 
