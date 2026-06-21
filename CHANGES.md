@@ -4,6 +4,9 @@
 
 - Preserved the complete checkout root for absolute Makefile paths containing
   spaces, brackets, or apostrophes, and rejected `MAKEFILE_LIST` overrides.
+- Hardened every public Make alias with `/bin/sh`, `/usr/bin/python3`, and a
+  secondary-expansion guard that rejects additional `-f` Makefiles before a
+  replaced recipe can claim success.
 - Added three SDK-free regression tests across all six Make aliases.
 - Moved the hosted policy, Python test, and Xcode project bootstrap outside
   mutable Make target, `ROOT`, and shell authority, with hostile hosted-equivalent

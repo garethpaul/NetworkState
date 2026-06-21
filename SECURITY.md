@@ -85,7 +85,10 @@ The hosted `baseline` job runs repository policy, Python tests, and the Xcode
 project check directly before entering any mutable Make target. This prevents
 duplicate `ROOT` assignments, recipe replacement, or caller shell settings from
 claiming successful policy validation. Local Make aliases remain convenience
-commands, not authority over an untrusted Makefile.
+commands, not authority over arbitrary caller-supplied Make programs. They pin
+`/bin/sh` and `/usr/bin/python3`, and they fail closed for the reviewed fake
+`python3`, command-line and `MAKEFLAGS` `SHELL`, `ROOT`, `MAKEFILE_LIST`, and
+additional `-f` Makefile controls.
 
 The workflow contract permits only the pinned checkout and exact validation
 step, with no job/step environment, custom shell, extra step, or command

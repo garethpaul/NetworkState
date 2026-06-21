@@ -80,6 +80,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Absolute Makefile paths containing spaces, brackets, or apostrophes retain
   the complete checkout root. `ROOT` overrides are ignored, and attempts to
   override GNU Make's `MAKEFILE_LIST` metadata fail closed.
+- Local Make aliases pin `/bin/sh` shell execution and `/usr/bin/python3`, and
+  they fail closed when additional `-f` Makefiles are loaded before any public
+  alias recipe can claim success.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
@@ -123,7 +126,10 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
 - Hosted validation invokes `scripts/check-baseline.py`, the Python policy
   tests, and `build.sh` directly and in that order. It does not trust Make
   targets, `ROOT`, or caller shell settings as its bootstrap. Local Make aliases
-  remain convenience entrypoints and cannot authenticate a modified Makefile.
+  remain convenience entrypoints; they reject the reviewed fake `python3`,
+  command-line and `MAKEFLAGS` `SHELL`, `ROOT`, `MAKEFILE_LIST`, and additional
+  `-f` Makefile controls, but hosted validation is still the branch-protection
+  authority for pull requests.
 - The reviewed workflow is exact: one pinned credential-free checkout and one
   validation step, with no job/step environment, custom shell, extra step, or
   command addition. Hosted Python and shell entrypoints and `xcodebuild` use

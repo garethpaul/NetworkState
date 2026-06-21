@@ -14,6 +14,8 @@ the SDK-free verifier to a fabricated caller path.
 2. Preserve the authoritative root against command-line and environment input.
 3. Reject command-line or environment-preferred `MAKEFILE_LIST` overrides.
 4. Exercise all six Make aliases from an external working directory.
+5. Pin Make alias execution to `/bin/sh` and `/usr/bin/python3`, and reject
+   additional `-f` Makefiles before public alias recipes run.
 
 ## Verification
 
@@ -21,6 +23,8 @@ the SDK-free verifier to a fabricated caller path.
 - All six Make aliases retained the checkout with no override and with
   command-line or environment `ROOT` input.
 - Both tested `MAKEFILE_LIST` override paths failed closed.
+- Fake `python3` on `PATH`, command-line and `MAKEFLAGS` `SHELL`, and later
+  `-f` recipe replacement were rejected across all six Make aliases.
 - Static reachability, Xcode project, scheme, podspec, and workflow contracts
   remained green; no Apple build ran locally.
 

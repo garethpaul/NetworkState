@@ -184,6 +184,145 @@ class MakefileRootTests(unittest.TestCase):
             self.assertIn("REAL_PROJECT_CHECK", result.stdout)
             self.assertFalse(fake_shell_log.exists())
 
+    def test_make_aliases_do_not_trust_python_from_path(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        targets = ("check", "lint", "static-check", "test", "build", "verify")
+        with tempfile.TemporaryDirectory(prefix="networkstate fake python ") as directory:
+            root = Path(directory)
+            checkout = root / "checkout"
+            external = root / "external caller"
+            tools = root / "tools"
+            checkout.mkdir()
+            external.mkdir()
+            tools.mkdir()
+            self.write_hosted_fixture(checkout, makefile)
+            fake_python_log = root / "fake-python-ran"
+            fake_python = tools / "python3"
+            fake_python.write_text(
+                "#!/bin/sh\n"
+                f"printf 'fake python %s\\n' \"$*\" >> {str(fake_python_log)!r}\n"
+                "exit 0\n",
+                encoding="utf-8",
+            )
+            fake_python.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = str(tools) + os.pathsep + environment["PATH"]
+
+            for target in targets:
+                with self.subTest(target=target):
+                    if fake_python_log.exists():
+                        fake_python_log.unlink()
+                    result = subprocess.run(
+                        [
+                            "make",
+                            "--no-print-directory",
+                            "-f",
+                            str(checkout / "Makefile"),
+                            target,
+                        ],
+                        cwd=external,
+                        env=environment,
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+
+                    self.assertEqual(0, result.returncode, result.stderr)
+                    self.assertIn("REAL_HOSTED_POLICY", result.stdout)
+                    self.assertIn("REAL_PYTHON_TESTS", result.stdout)
+                    self.assertFalse(fake_python_log.exists(), fake_python_log.read_text() if fake_python_log.exists() else "")
+
+    def test_make_aliases_do_not_trust_command_line_or_makeflags_shell(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        targets = ("check", "lint", "static-check", "test", "build", "verify")
+        with tempfile.TemporaryDirectory(prefix="networkstate-fake-shell-") as directory:
+            root = Path(directory)
+            checkout = root / "checkout"
+            external = root / "external caller"
+            tools = root / "tools"
+            checkout.mkdir()
+            external.mkdir()
+            tools.mkdir()
+            self.write_hosted_fixture(checkout, makefile)
+            fake_shell = tools / "fake-shell"
+            fake_shell.write_text(
+                "#!/bin/sh\n"
+                "printf 'fake shell %s\\n' \"$*\" >> \"$FAKE_SHELL_LOG\"\n"
+                "exit 0\n",
+                encoding="utf-8",
+            )
+            fake_shell.chmod(0o755)
+
+            for target in targets:
+                for channel in ("command line", "MAKEFLAGS"):
+                    with self.subTest(target=target, channel=channel):
+                        fake_shell_log = root / f"fake-shell-{target}-{channel.replace(' ', '-')}.log"
+                        environment = os.environ.copy()
+                        environment["FAKE_SHELL_LOG"] = str(fake_shell_log)
+                        arguments = [
+                            "make",
+                            "--no-print-directory",
+                            "-f",
+                            str(checkout / "Makefile"),
+                            target,
+                        ]
+                        if channel == "command line":
+                            arguments.append(f"SHELL={fake_shell}")
+                        else:
+                            environment["MAKEFLAGS"] = f"SHELL={fake_shell}"
+
+                        result = subprocess.run(
+                            arguments,
+                            cwd=external,
+                            env=environment,
+                            capture_output=True,
+                            text=True,
+                            check=False,
+                        )
+
+                        self.assertEqual(0, result.returncode, result.stderr)
+                        self.assertIn("REAL_HOSTED_POLICY", result.stdout)
+                        self.assertIn("REAL_PYTHON_TESTS", result.stdout)
+                        self.assertFalse(fake_shell_log.exists(), fake_shell_log.read_text() if fake_shell_log.exists() else "")
+
+    def test_later_makefile_recipe_replacement_fails_before_public_aliases(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        targets = ("check", "lint", "static-check", "test", "build", "verify")
+        with tempfile.TemporaryDirectory(prefix="networkstate later makefile ") as directory:
+            root = Path(directory)
+            for target in targets:
+                with self.subTest(target=target):
+                    checkout = root / target
+                    external = checkout / "external caller"
+                    checkout.mkdir()
+                    external.mkdir()
+                    self.write_hosted_fixture(checkout, makefile)
+                    later_makefile = checkout / "later.mk"
+                    later_makefile.write_text(
+                        f"{target}:\n\t@echo LATER_RECIPE_{target}\n",
+                        encoding="utf-8",
+                    )
+
+                    result = subprocess.run(
+                        [
+                            "make",
+                            "--no-print-directory",
+                            "-f",
+                            str(checkout / "Makefile"),
+                            "-f",
+                            str(later_makefile),
+                            target,
+                        ],
+                        cwd=external,
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+
+                    self.assertNotEqual(0, result.returncode, result.stdout)
+                    self.assertIn("additional Makefiles are not allowed", result.stderr)
+                    self.assertNotIn(f"LATER_RECIPE_{target}", result.stdout)
+
     def test_workflow_rejects_authority_mutations(self):
         workflow = (ROOT / ".github/workflows/check.yml").read_text(encoding="utf-8")
         mutations = {
