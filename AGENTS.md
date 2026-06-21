@@ -11,9 +11,10 @@ This repository maintains a small Swift wrapper around legacy
 - Run `./build.sh` on macOS to compile and execute the XCTest truth table.
 - Override `DESTINATION`, `SWIFT_VERSION`, or `IPHONEOS_DEPLOYMENT_TARGET` when
   validating with a different installed Xcode toolchain.
-- Treat Make aliases as convenience wrappers. The hosted direct chain remains
-  the pull-request authority, and local Make must fail closed for fake
-  `python3`, caller `SHELL`, and additional `-f` Makefile controls.
+- Treat Make aliases as convenience wrappers for the checked-in Makefile. The
+  hosted direct workflow remains authoritative for pull requests; additional
+  `-f` Makefiles are caller-supplied Make programs outside the local Make trust
+  boundary.
 
 ## Reachability Rules
 

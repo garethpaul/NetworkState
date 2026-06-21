@@ -285,43 +285,60 @@ class MakefileRootTests(unittest.TestCase):
                         self.assertIn("REAL_PYTHON_TESTS", result.stdout)
                         self.assertFalse(fake_shell_log.exists(), fake_shell_log.read_text() if fake_shell_log.exists() else "")
 
-    def test_later_makefile_recipe_replacement_fails_before_public_aliases(self):
+    def test_contract_keeps_additional_makefiles_outside_local_make_trust_boundary(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-        targets = ("check", "lint", "static-check", "test", "build", "verify")
-        with tempfile.TemporaryDirectory(prefix="networkstate later makefile ") as directory:
-            root = Path(directory)
-            for target in targets:
-                with self.subTest(target=target):
-                    checkout = root / target
-                    external = checkout / "external caller"
-                    checkout.mkdir()
-                    external.mkdir()
-                    self.write_hosted_fixture(checkout, makefile)
-                    later_makefile = checkout / "later.mk"
-                    later_makefile.write_text(
-                        f"{target}:\n\t@echo LATER_RECIPE_{target}\n",
-                        encoding="utf-8",
-                    )
+        self.assertNotIn(".SECONDEXPANSION", makefile)
+        self.assertNotIn("MAKEFILE_LIST_GUARD", makefile)
 
-                    result = subprocess.run(
-                        [
-                            "make",
-                            "--no-print-directory",
-                            "-f",
-                            str(checkout / "Makefile"),
-                            "-f",
-                            str(later_makefile),
-                            target,
-                        ],
-                        cwd=external,
-                        capture_output=True,
-                        text=True,
-                        check=False,
-                    )
+        docs = "\n".join(
+            (ROOT / path).read_text(encoding="utf-8")
+            for path in [
+                "README.md",
+                "SECURITY.md",
+                "AGENTS.md",
+                "CHANGES.md",
+                "docs/plans/2026-06-21-spaced-makefile-path.md",
+            ]
+        )
+        for phrase in [
+            "additional `-f` Makefiles are caller-supplied Make programs",
+            "outside the local Make trust boundary",
+            "hosted direct workflow remains authoritative",
+        ]:
+            self.assertIn(phrase, docs)
+        for overclaim in [
+            "reject additional `-f`",
+            "additional `-f` Makefiles before",
+            "recipe replacement were rejected",
+            "before a replaced recipe can claim success",
+        ]:
+            self.assertNotIn(overclaim, docs)
 
-                    self.assertNotEqual(0, result.returncode, result.stdout)
-                    self.assertIn("additional Makefiles are not allowed", result.stderr)
-                    self.assertNotIn(f"LATER_RECIPE_{target}", result.stdout)
+    def test_hosted_direct_chain_rejects_repository_mutation_before_make(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        commands = self.hosted_commands()
+        self.assertNotIn("make ", commands)
+        self.assertNotIn("make\n", commands)
+        with tempfile.TemporaryDirectory(prefix="networkstate hosted direct mutation ") as directory:
+            checkout = Path(directory) / "checkout"
+            checkout.mkdir()
+            self.write_hosted_fixture(
+                checkout,
+                makefile + "\ncheck:\n\t@echo MAKE_WOULD_CLAIM_SUCCESS\n",
+            )
+
+            result = subprocess.run(
+                ["/bin/sh", "-e", "-c", commands],
+                cwd=checkout,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(0, result.returncode, result.stdout)
+            self.assertIn("REAL_HOSTED_POLICY", result.stdout)
+            self.assertIn("hosted policy rejected Makefile mutation", result.stderr)
+            self.assertNotIn("MAKE_WOULD_CLAIM_SUCCESS", result.stdout)
 
     def test_workflow_rejects_authority_mutations(self):
         workflow = (ROOT / ".github/workflows/check.yml").read_text(encoding="utf-8")
