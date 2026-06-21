@@ -120,6 +120,19 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
   `NetworkState.xcodeproj` without simulator execution, signing, pod
   publishing, or runtime connectivity checks. Checkout credentials are not
   persisted after source retrieval.
+- Hosted validation invokes `scripts/check-baseline.py`, the Python policy
+  tests, and `build.sh` directly and in that order. It does not trust Make
+  targets, `ROOT`, or caller shell settings as its bootstrap. Local Make aliases
+  remain convenience entrypoints and cannot authenticate a modified Makefile.
+- The reviewed workflow is exact: one pinned credential-free checkout and one
+  validation step, with no job/step environment, custom shell, extra step, or
+  command addition. Hosted Python and shell entrypoints and `xcodebuild` use
+  absolute system paths, so repository or `PATH` shadowing cannot claim native
+  validation.
+- The workflow is pull-request editable. Branch protection must continue to
+  require the GitHub Actions `baseline` context, and reviewers must treat
+  workflow changes as changes to verification authority. Repository code cannot
+  enforce those provider-side settings by itself.
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
 - XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.

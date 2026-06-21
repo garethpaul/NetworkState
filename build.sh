@@ -9,13 +9,14 @@ SDK=${SDK:-iphonesimulator}
 SWIFT_VERSION=${SWIFT_VERSION:-5.0}
 IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}
 CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}
+XCODEBUILD=/usr/bin/xcodebuild
 
-if ! command -v xcodebuild >/dev/null 2>&1; then
+if [ ! -x "$XCODEBUILD" ]; then
     echo "xcodebuild is required to run ${SCHEME}" >&2
     exit 127
 fi
 
-xcodebuild -project "${PROJECT}" \
+"$XCODEBUILD" -project "${PROJECT}" \
            -scheme "${SCHEME}" \
            -destination "${DESTINATION}" \
            -sdk "${SDK}" \

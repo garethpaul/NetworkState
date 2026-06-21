@@ -2,9 +2,9 @@
 """Static baseline checks for the legacy NetworkState Swift framework."""
 
 from pathlib import Path
+import os
 import plistlib
 import re
-import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -25,6 +25,29 @@ lint test build verify: static-check
 static-check:
 \tpython3 "$(ROOT)/scripts/check-baseline.py"
 \tPYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
+"""
+EXPECTED_WORKFLOW = """name: Check
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  baseline:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - run: |
+          /usr/bin/python3 scripts/check-baseline.py
+          PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m unittest discover -s tests -p 'test_*.py'
+          /bin/sh ./build.sh
 """
 REQUIRED = [
     ".gitignore",
@@ -182,7 +205,7 @@ def main() -> int:
         failures.append("placeholder XCTest methods must be replaced")
 
     build = read("build.sh")
-    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"', "command -v xcodebuild"]:
+    for phrase in ["PROJECT=${PROJECT:-NetworkState.xcodeproj}", "SCHEME=${SCHEME:-NetworkStateTests}", "DESTINATION=${DESTINATION:-", "SWIFT_VERSION=${SWIFT_VERSION:-5.0}", "IPHONEOS_DEPLOYMENT_TARGET=${IPHONEOS_DEPLOYMENT_TARGET:-12.0}", "CODE_SIGNING_ALLOWED=${CODE_SIGNING_ALLOWED:-NO}", "XCODEBUILD=/usr/bin/xcodebuild", '[ ! -x "$XCODEBUILD" ]', 'SWIFT_VERSION="${SWIFT_VERSION}"', 'IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}"', 'CODE_SIGNING_ALLOWED="${CODE_SIGNING_ALLOWED}"']:
         if phrase not in build:
             failures.append(f"build.sh must include {phrase}")
     if "function " in build:
@@ -420,11 +443,11 @@ def main() -> int:
         "runs-on: macos-15",
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
-        "run: make check",
-        "run: ./build.sh",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+    if workflow != EXPECTED_WORKFLOW:
+        failures.append("Check workflow must preserve the exact reviewed workflow")
 
     checkout_plan = read("docs/plans/2026-06-12-checkout-credential-boundary.md")
     if (
@@ -465,9 +488,10 @@ def main() -> int:
         if phrase not in guidance:
             failures.append(f"repository guidance must mention {phrase}")
 
-    if shutil.which("xcodebuild"):
+    xcodebuild = Path("/usr/bin/xcodebuild")
+    if xcodebuild.is_file() and os.access(xcodebuild, os.X_OK):
         result = subprocess.run(
-            ["xcodebuild", "-list", "-project", "NetworkState.xcodeproj"],
+            [str(xcodebuild), "-list", "-project", "NetworkState.xcodeproj"],
             cwd=ROOT,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,

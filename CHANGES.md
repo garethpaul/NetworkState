@@ -5,6 +5,11 @@
 - Preserved the complete checkout root for absolute Makefile paths containing
   spaces, brackets, or apostrophes, and rejected `MAKEFILE_LIST` overrides.
 - Added three SDK-free regression tests across all six Make aliases.
+- Moved the hosted policy, Python test, and Xcode project bootstrap outside
+  mutable Make target, `ROOT`, and shell authority, with hostile hosted-equivalent
+  regression coverage and an explicit required-context trust boundary.
+- Required the exact hosted workflow and absolute Python, shell, and Xcode tool
+  paths, rejecting environment, step, shell, command, and fake-tool shadowing.
 
 ## 2026-06-19
 

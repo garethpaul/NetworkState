@@ -81,6 +81,22 @@ repeatable.
 The hosted gate uses a credential-free checkout so its read-only token is not
 retained in the runner's Git configuration.
 
+The hosted `baseline` job runs repository policy, Python tests, and the Xcode
+project check directly before entering any mutable Make target. This prevents
+duplicate `ROOT` assignments, recipe replacement, or caller shell settings from
+claiming successful policy validation. Local Make aliases remain convenience
+commands, not authority over an untrusted Makefile.
+
+The workflow contract permits only the pinned checkout and exact validation
+step, with no job/step environment, custom shell, extra step, or command
+addition. Hosted Python, shell, and `xcodebuild` entrypoints use absolute system
+paths so checked-in or `PATH`-injected replacements cannot claim success.
+
+The workflow itself is pull-request editable. Branch protection must require
+the GitHub Actions `baseline` context, and workflow changes require review as
+changes to verification authority. Repository code cannot independently
+guarantee those provider-side settings.
+
 ## Safe Research Guidelines
 
 Good-faith research is welcome when it stays within these boundaries:
