@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-21
+
+- Preserved the complete checkout root for absolute Makefile paths containing
+  spaces, brackets, or apostrophes, and rejected `MAKEFILE_LIST` overrides.
+- Added three SDK-free regression tests across all six Make aliases.
+
 ## 2026-06-19
 
 - Made the reachability truth table executable on current Xcode while retaining
