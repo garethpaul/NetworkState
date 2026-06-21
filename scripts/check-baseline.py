@@ -11,7 +11,10 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_MAKEFILE = """override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+EXPECTED_MAKEFILE = """ifneq ($(origin MAKEFILE_LIST),file)
+$(error MAKEFILE_LIST must not be overridden)
+endif
+override ROOT := $(shell path='$(subst ','"'"',$(MAKEFILE_LIST))'; path=$$(printf '%s\\n' "$$path" | sed 's/^ //'); dirname -- "$$path")
 
 .PHONY: build check lint static-check test verify
 
@@ -21,6 +24,7 @@ lint test build verify: static-check
 
 static-check:
 \tpython3 "$(ROOT)/scripts/check-baseline.py"
+\tPYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$(ROOT)/tests" -p 'test_*.py'
 """
 REQUIRED = [
     ".gitignore",
@@ -61,7 +65,9 @@ REQUIRED = [
     "docs/plans/2026-06-13-location-independent-make.md",
     "docs/plans/2026-06-15-reachability-decision-truth-table.md",
     "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
+    "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/readme-overview.svg",
+    "tests/test_makefile_root.py",
 ]
 
 
@@ -238,6 +244,7 @@ def main() -> int:
     location_independent_make_plan = read(
         "docs/plans/2026-06-13-location-independent-make.md"
     )
+    spaced_makefile_plan = read("docs/plans/2026-06-21-spaced-makefile-path.md")
     if "make -f /path/to/NetworkState/Makefile check" not in readme_source:
         failures.append("README must document location-independent Makefile invocation")
     if not all(
@@ -251,6 +258,13 @@ def main() -> int:
         failures.append(
             "location-independent Make plan must record completed root, external, and mutation verification"
         )
+    if not all(value in spaced_makefile_plan for value in [
+        "status: completed",
+        "spaces, brackets, and an apostrophe",
+        "MAKEFILE_LIST",
+        "all six Make aliases",
+    ]):
+        failures.append("spaced Makefile path plan must preserve hostile-path and override verification")
     for phrase in [
         "make check",
         "pod spec lint",

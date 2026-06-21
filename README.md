@@ -77,6 +77,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - The Make gates are location-independent. From another directory, pass the
   checkout's Makefile by absolute path, such as
   `make -f /path/to/NetworkState/Makefile check`.
+- Absolute Makefile paths containing spaces, brackets, or apostrophes retain
+  the complete checkout root. `ROOT` overrides are ignored, and attempts to
+  override GNU Make's `MAKEFILE_LIST` metadata fail closed.
 - Run `./build.sh` when the required platform toolchain is installed. Override the simulator when needed:
 - The build script defaults `CODE_SIGNING_ALLOWED=NO` for simulator validation;
   override it only when intentionally testing signing behavior.
