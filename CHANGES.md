@@ -1,5 +1,92 @@
 # Changes
 
+## 2026-06-25 12:12 PDT - P2 - Clarify current CocoaPods source
+
+### Summary
+
+Documented that the checked-in root podspec describes current default-branch
+source while the historical `0.0.2` tag still resolves the original 2016 Swift
+implementation.
+
+### Work completed
+
+- Added a current-branch Git Podfile example without claiming CocoaPods trunk
+  publication.
+- Added reviewed-commit pinning guidance for reproducible builds.
+- Added exact positive and stale-tag regression contracts plus maintenance and
+  roadmap boundaries.
+
+### Threads
+
+- Started: none; the package-source documentation gap was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `README.md` — added current source, stale-tag, trunk, and pinning guidance.
+- `scripts/check-baseline.py` — enforced the exact package-source boundary.
+- `AGENTS.md` — recorded the historical-tag maintenance rule.
+- `VISION.md` — recorded the package release boundary.
+- `docs/plans/2026-06-25-cocoapods-source-boundary.md` — recorded evidence,
+  scope, and verification.
+
+### Validation
+
+- Initial baseline check — failed on the missing plan.
+- Second red baseline check — after adding scope evidence, reported five missing
+  README fragments plus incomplete verification evidence.
+- First green attempt — exposed an overbroad stale-tag check that also rejected
+  explanatory prose; narrowed it to actual `pod 'NetworkState'` tag syntax.
+- Three hostile mutations — stale tag, CocoaPods trunk overclaim, and weakened
+  reviewed-commit guidance were rejected for the intended contract failures.
+- The first pinning mutation command allowed shell backtick substitution and
+  failed for the wrong reason; the safely quoted rerun passed the intended
+  rejection assertion.
+- All six Make aliases passed from the repository root and an external working
+  directory; each run included the baseline and all 12 Python policy tests.
+- Python bytecode compilation and `git diff --check` passed. Validation-created
+  bytecode plus the empty file produced by the misquoted mutation command were
+  removed before review.
+- First exact-head Codex review — clean on
+  `148459249eebc876cb0af121d2ef2c1d2615fd0e` with no actionable findings.
+- First hosted pull-request run — macOS baseline, framework build, XCTest,
+  CodeQL Actions, and CodeQL Python passed. A duplicate push-triggered baseline
+  for the same head was canceled after the pull-request run became authoritative.
+- Final-review finding — Codex identified that the stale-tag regex missed
+  multiline `:tag =>` declarations and modern `tag:` Ruby hash syntax.
+- Review fix — parse Ruby code blocks into `NetworkState` pod declarations,
+  normalize declaration whitespace, and reject both tag syntaxes. Focused
+  modern-hash and multiline mutations now fail for the stale-tag contract.
+- Second review finding — the required negative trunk sentence could coexist
+  with a contradictory availability claim or bare trunk-only Podfile entry.
+- Second review fix — reject `NetworkState` pod declarations without an
+  explicit Git source and scan outside the exact disclaimer for install,
+  availability, or publication claims. Contradictory-text and bare-install
+  mutations now fail for their intended trunk contracts.
+- Third review finding — the phrase-specific trunk scan still missed common
+  `available in` and `install via` wording.
+- Third review fix — remove the one exact negative disclaimer and reject every
+  remaining `CocoaPods trunk` mention, avoiding language-specific false
+  negatives. Both newly identified wording variants now fail.
+- Local Xcode remained unavailable and skipped truthfully. Merge remains
+  conditional on clean exact-head review and successful final hosted reruns.
+
+### Bugs / findings
+
+- P2: consumers could reasonably treat root podspec version `0.0.2` as evidence
+  that the same-named immutable tag contained the current implementation.
+
+### Blockers
+
+- Local Linux cannot run Xcode or CocoaPods lint; hosted macOS remains
+  authoritative for the existing framework build and XCTest truth table.
+
+### Next action
+
+- Merge only after clean exact-head review and final hosted baseline and CodeQL
+  success.
+
 ## 2026-06-21
 
 - Preserved the complete checkout root for absolute Makefile paths containing

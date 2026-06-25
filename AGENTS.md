@@ -30,5 +30,7 @@ This repository maintains a small Swift wrapper around legacy
 
 - Preserve the public Boolean API and fixture evaluator unless a reviewed
   compatibility change explicitly replaces them.
+- Do not recommend the historical `0.0.2` tag as current source; package
+  guidance must distinguish mutable branch installs from reviewed commit pins.
 - Keep checkout credentials disabled and the single hosted workflow intact.
 - Record skipped device, carrier, captive-portal, and live-service validation.

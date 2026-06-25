@@ -54,6 +54,21 @@ make check
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
+### CocoaPods Source Boundary
+
+To inspect or integrate the current default-branch source through CocoaPods,
+use the repository as an external Git dependency:
+
+```ruby
+pod 'NetworkState', :git => 'https://github.com/garethpaul/NetworkState.git', :branch => 'master'
+```
+
+The checked-in root podspec describes the current source, but its `0.0.2` version matches a historical tag that predates the current Swift implementation and tests. Do not pin the dependency to version tag `0.0.2`; that tag resolves the 2016 source rather than the current default-branch implementation.
+
+A branch dependency is mutable. For reproducible builds, inspect the selected
+revision and replace `:branch => 'master'` with a reviewed commit. This
+repository does not claim that `NetworkState` is available from the CocoaPods trunk; a future package release needs a new immutable version, matching source revision, and successful podspec lint.
+
 ## Running or Using the Project
 
 - Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.

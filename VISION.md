@@ -49,6 +49,8 @@ Priority:
   of internet or service availability
 - Keep CocoaPods as the only declared package-manager integration until another
   manager is added and verified in a focused change
+- Keep the historical 0.0.2 tag distinct from the current root podspec and
+  default-branch source until a new immutable package release is prepared
 - Keep connectivity evaluation local to the device with no remote probes,
   telemetry, or endpoint checks
 
