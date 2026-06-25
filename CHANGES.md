@@ -64,6 +64,11 @@ implementation.
   explicit Git source and scan outside the exact disclaimer for install,
   availability, or publication claims. Contradictory-text and bare-install
   mutations now fail for their intended trunk contracts.
+- Third review finding — the phrase-specific trunk scan still missed common
+  `available in` and `install via` wording.
+- Third review fix — remove the one exact negative disclaimer and reject every
+  remaining `CocoaPods trunk` mention, avoiding language-specific false
+  negatives. Both newly identified wording variants now fail.
 - Local Xcode remained unavailable and skipped truthfully. Merge remains
   conditional on clean exact-head review and successful final hosted reruns.
 

@@ -306,11 +306,7 @@ def main() -> int:
         "does not claim that `NetworkState` is available from the CocoaPods trunk"
     )
     trunk_claim_source = readme_source.replace(trunk_disclaimer, "")
-    if re.search(
-        r"(?:\binstall\s+from|\bavailable\s+(?:from|on)|\bpublished\s+(?:to|on))\s+(?:the\s+)?CocoaPods\s+trunk\b",
-        trunk_claim_source,
-        re.IGNORECASE,
-    ):
+    if re.search(r"\bCocoaPods\s+trunk\b", trunk_claim_source, re.IGNORECASE):
         failures.append("README must not claim CocoaPods trunk availability")
     if not all(
         evidence in cocoapods_source_plan.lower()

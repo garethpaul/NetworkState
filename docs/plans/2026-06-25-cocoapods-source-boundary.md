@@ -69,4 +69,7 @@ published CocoaPods trunk release.
   contradictory trunk claim. The checker now rejects bare `NetworkState` pod
   declarations without Git plus separate install, availability, or publication
   claims outside the exact disclaimer; two focused mutations cover both paths.
+- A third review showed phrase-specific trunk matching still missed `available
+  in` and `install via`. The final rule removes the one exact disclaimer and
+  rejects any remaining `CocoaPods trunk` mention; both variants are covered.
 - Complete local, hosted, and review evidence is recorded in `CHANGES.md`.
