@@ -48,8 +48,13 @@ implementation.
 - Python bytecode compilation and `git diff --check` passed. Validation-created
   bytecode plus the empty file produced by the misquoted mutation command were
   removed before review.
-- Local Xcode remained unavailable and skipped truthfully. Hosted Xcode tests
-  and exact-head review remain pending.
+- First exact-head Codex review — clean on
+  `148459249eebc876cb0af121d2ef2c1d2615fd0e` with no actionable findings.
+- First hosted pull-request run — macOS baseline, framework build, XCTest,
+  CodeQL Actions, and CodeQL Python passed. A duplicate push-triggered baseline
+  for the same head was canceled after the pull-request run became authoritative.
+- Local Xcode remained unavailable and skipped truthfully. Final exact-head
+  review and hosted reruns remain required after this evidence update.
 
 ### Bugs / findings
 
@@ -63,8 +68,8 @@ implementation.
 
 ### Next action
 
-- Open the pull request, run exact-head review, and require hosted baseline and
-  Xcode success before merge.
+- Re-run exact-head review and require final hosted baseline and CodeQL success
+  before merge.
 
 ## 2026-06-21
 
