@@ -26,6 +26,9 @@ xcuserdata
 .env
 .env.*
 
+# Local repository intelligence
+.explore/
+
 ## Other
 *.xccheckout
 *.moved-aside

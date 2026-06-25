@@ -1,5 +1,69 @@
 # Changes
 
+## 2026-06-25 14:54 PDT - P2 - Ignore local repository intelligence
+
+### Summary
+
+Kept maintainer-local `.explore/` notes out of source-control status and
+accidental pull-request changes while requiring durable decisions to remain in
+tracked repository documents.
+
+### Work completed
+
+- Added the active `.explore/` directory pattern to `.gitignore`.
+- Extended the canonical ignore contract and made it reject commented-out
+  patterns rather than accepting raw substrings.
+- Documented the local-only intelligence boundary in contributor, setup,
+  roadmap, and implementation-plan guidance.
+
+### Threads
+
+- Started: local repository intelligence ignore boundary.
+- Continued: canonical baseline ownership of local and generated artifacts.
+- Stopped: none.
+
+### Files changed
+
+- `.gitignore` — ignored repository-local `.explore/` files.
+- `scripts/check-baseline.py` — enforced active, non-comment ignore entries.
+- `tests/test_baseline_contracts.py` — covered commented ignore patterns.
+- `README.md` — distinguished local notes from source and durable evidence.
+- `AGENTS.md` — added the maintenance rule.
+- `VISION.md` — added the contribution guardrail.
+- `docs/plans/2026-06-25-local-intelligence-ignore.md` — recorded evidence,
+  decisions, verification, and risk.
+- `CHANGES.md` — recorded this P2 cycle.
+
+### Validation
+
+- Red-first baseline — failed with `.gitignore must include .explore/` before
+  the active ignore rule was added.
+- Red-first unit regression — failed because the active-pattern parser helper
+  did not yet exist.
+- Commented-rule hostile mutation — failed with the intended missing-pattern
+  error after the active rule was temporarily commented out.
+- All six Make aliases passed from the repository root and an external working
+  directory; each run included the baseline and 13 Python policy tests.
+- Direct Python discovery, syntax parsing, `git check-ignore`, and
+  `git diff --check` passed.
+- Hosted and exact-head review validation is pending.
+
+### Bugs / findings
+
+- P2: persistent local intelligence appeared as untracked source in every
+  checkout and could be staged or published accidentally.
+- P2: the prior raw-substring ignore checker would accept a commented-out rule.
+
+### Blockers
+
+- Local Linux cannot run Xcode; hosted macOS remains authoritative for the
+  framework build and XCTest truth table.
+
+### Next action
+
+- Complete hostile ignore mutation, local gates, exact-head review, and hosted
+  checks; merge only when all evidence is clean.
+
 ## 2026-06-25 12:12 PDT - P2 - Clarify current CocoaPods source
 
 ### Summary

@@ -98,13 +98,23 @@ REQUIRED = [
     "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
     "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/plans/2026-06-25-cocoapods-source-boundary.md",
+    "docs/plans/2026-06-25-local-intelligence-ignore.md",
     "docs/readme-overview.svg",
+    "tests/test_baseline_contracts.py",
     "tests/test_makefile_root.py",
 ]
 
 
 def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8", errors="replace")
+
+
+def active_gitignore_patterns(source: str) -> set[str]:
+    return {
+        line.strip()
+        for line in source.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
 
 
 def main() -> int:
@@ -256,7 +266,7 @@ def main() -> int:
     ):
         failures.append("shared framework scheme must build the NetworkState framework target")
 
-    gitignore = read(".gitignore")
+    gitignore_patterns = active_gitignore_patterns(read(".gitignore"))
     for expected in [
         "DerivedData/",
         "*.local.xcconfig",
@@ -267,8 +277,9 @@ def main() -> int:
         "*.p8",
         ".xcode.env.local",
         ".env",
+        ".explore/",
     ]:
-        if expected not in gitignore:
+        if expected not in gitignore_patterns:
             failures.append(f".gitignore must include {expected}")
 
     readme_source = read("README.md")
