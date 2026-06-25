@@ -65,4 +65,8 @@ published CocoaPods trunk release.
   single-line hash-rocket declaration. The corrected checker normalizes each
   `NetworkState` declaration and rejects both multiline `:tag => '0.0.2'` and
   modern `tag: '0.0.2'` syntax; focused hostile mutations cover both forms.
+- A follow-up review found that the required disclaimer could coexist with a
+  contradictory trunk claim. The checker now rejects bare `NetworkState` pod
+  declarations without Git plus separate install, availability, or publication
+  claims outside the exact disclaimer; two focused mutations cover both paths.
 - Complete local, hosted, and review evidence is recorded in `CHANGES.md`.

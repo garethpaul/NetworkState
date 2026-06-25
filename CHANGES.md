@@ -58,6 +58,12 @@ implementation.
 - Review fix — parse Ruby code blocks into `NetworkState` pod declarations,
   normalize declaration whitespace, and reject both tag syntaxes. Focused
   modern-hash and multiline mutations now fail for the stale-tag contract.
+- Second review finding — the required negative trunk sentence could coexist
+  with a contradictory availability claim or bare trunk-only Podfile entry.
+- Second review fix — reject `NetworkState` pod declarations without an
+  explicit Git source and scan outside the exact disclaimer for install,
+  availability, or publication claims. Contradictory-text and bare-install
+  mutations now fail for their intended trunk contracts.
 - Local Xcode remained unavailable and skipped truthfully. Merge remains
   conditional on clean exact-head review and successful final hosted reruns.
 

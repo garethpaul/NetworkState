@@ -293,11 +293,25 @@ def main() -> int:
         )
         for declaration in declarations:
             normalized_declaration = re.sub(r"\s+", " ", declaration)
+            if not re.search(r"(?::git\s*=>|git:)", normalized_declaration):
+                failures.append(
+                    "README must not recommend trunk-only NetworkState installation"
+                )
             if re.search(
                 r"(?::tag\s*=>|tag:)\s*['\"]0\.0\.2['\"]",
                 normalized_declaration,
             ):
                 failures.append("README must not recommend the stale 0.0.2 source tag")
+    trunk_disclaimer = (
+        "does not claim that `NetworkState` is available from the CocoaPods trunk"
+    )
+    trunk_claim_source = readme_source.replace(trunk_disclaimer, "")
+    if re.search(
+        r"(?:\binstall\s+from|\bavailable\s+(?:from|on)|\bpublished\s+(?:to|on))\s+(?:the\s+)?CocoaPods\s+trunk\b",
+        trunk_claim_source,
+        re.IGNORECASE,
+    ):
+        failures.append("README must not claim CocoaPods trunk availability")
     if not all(
         evidence in cocoapods_source_plan.lower()
         for evidence in [
