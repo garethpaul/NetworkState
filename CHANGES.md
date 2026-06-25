@@ -12,7 +12,8 @@ tracked repository documents.
 
 - Added the active `.explore/` directory pattern to `.gitignore`.
 - Extended the canonical ignore contract and made it reject commented-out
-  patterns rather than accepting raw substrings.
+  patterns or leading-whitespace lookalikes rather than accepting normalized
+  raw substrings.
 - Documented the local-only intelligence boundary in contributor, setup,
   roadmap, and implementation-plan guidance.
 
@@ -26,7 +27,7 @@ tracked repository documents.
 
 - `.gitignore` — ignored repository-local `.explore/` files.
 - `scripts/check-baseline.py` — enforced active, non-comment ignore entries.
-- `tests/test_baseline_contracts.py` — covered commented ignore patterns.
+- `tests/test_baseline_contracts.py` — covered comments and leading whitespace.
 - `README.md` — distinguished local notes from source and durable evidence.
 - `AGENTS.md` — added the maintenance rule.
 - `VISION.md` — added the contribution guardrail.
@@ -46,6 +47,10 @@ tracked repository documents.
   directory; each run included the baseline and 13 Python policy tests.
 - Direct Python discovery, syntax parsing, `git check-ignore`, and
   `git diff --check` passed.
+- First exact-head Codex review — found that trimming leading whitespace could
+  accept ` .explore/` even though Git would not apply it to `.explore/foo`.
+- Review fix — preserve pattern bytes, ignore only actual comment lines, and
+  cover the malformed leading-space rule in the permanent unit regression.
 - Hosted and exact-head review validation is pending.
 
 ### Bugs / findings
@@ -53,6 +58,8 @@ tracked repository documents.
 - P2: persistent local intelligence appeared as untracked source in every
   checkout and could be staged or published accidentally.
 - P2: the prior raw-substring ignore checker would accept a commented-out rule.
+- P2: the first active-pattern parser normalized leading whitespace and could
+  accept a rule that Git would not apply.
 
 ### Blockers
 

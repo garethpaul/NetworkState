@@ -21,12 +21,14 @@ in reviewed repository documents.
   configuration exclusions but did not enforce the intelligence boundary.
 - A raw substring check would accept a commented-out ignore rule even though
   Git would not apply it.
+- Trimming leading whitespace would also turn a malformed nonmatching rule into
+  the required canonical pattern inside the checker.
 
 ## Decisions
 
 - Add the exact active `.explore/` directory pattern to `.gitignore`.
-- Parse active ignore entries in the baseline checker so comments cannot satisfy
-  required ignore contracts.
+- Parse active ignore entries without trimming their pattern bytes so comments
+  and malformed leading whitespace cannot satisfy required ignore contracts.
 - Document that local notes are not product source or durable review evidence.
 - Keep the change repository-local; do not delete or publish existing local
   intelligence files.
@@ -39,6 +41,7 @@ in reviewed repository documents.
 - Verify `git check-ignore` accepts a representative `.explore/` file.
 - Temporarily comment out the rule and prove the strengthened checker rejects
   it, then restore the active rule.
+- Prove a leading-space rule remains distinct from the required canonical rule.
 - Run every Make alias from the root and an external working directory.
 - Require exact-head Codex review and hosted Xcode/CodeQL success before merge.
 

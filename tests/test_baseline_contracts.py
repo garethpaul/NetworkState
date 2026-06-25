@@ -12,12 +12,12 @@ SPEC.loader.exec_module(CHECK_BASELINE)
 
 
 class GitignoreContractTests(unittest.TestCase):
-    def test_commented_patterns_are_not_active(self):
-        source = "# .explore/\n.explore-cache/\n\nDerivedData/\n"
+    def test_comments_and_leading_whitespace_do_not_create_required_patterns(self):
+        source = "# .explore/\n .explore/\n.explore-cache/\n\nDerivedData/\n"
 
         self.assertEqual(
             CHECK_BASELINE.active_gitignore_patterns(source),
-            {".explore-cache/", "DerivedData/"},
+            {" .explore/", ".explore-cache/", "DerivedData/"},
         )
 
 

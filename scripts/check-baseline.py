@@ -111,9 +111,9 @@ def read(path: str) -> str:
 
 def active_gitignore_patterns(source: str) -> set[str]:
     return {
-        line.strip()
+        line
         for line in source.splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
+        if line and not line.startswith("#")
     }
 
 
