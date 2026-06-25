@@ -62,8 +62,9 @@ tracked repository documents.
   baseline, 13 Python tests, framework build, and XCTest suite in 2m23s.
 - Third exact-head Codex review — found that a later `!.explore/` rule could
   disable Git's ignore behavior while leaving the textual contract satisfied.
-- Review fix — require pinned `git check-ignore --no-index` success for a
-  representative local-intelligence path and cover positive/negated behavior.
+- Review fix — require pinned `git check-ignore --no-index` success for both
+  the directory and a representative file, covering positive, negated, and
+  selective child re-inclusion behavior.
 
 ### Bugs / findings
 

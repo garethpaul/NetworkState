@@ -292,8 +292,9 @@ def main() -> int:
     ]:
         if expected not in gitignore_patterns:
             failures.append(f".gitignore must include {expected}")
-    if not git_ignores(ROOT, ".explore/REPO_MAP.md"):
-        failures.append(".gitignore must effectively ignore .explore/ files")
+    for ignored_path in [".explore/", ".explore/REPO_MAP.md"]:
+        if not git_ignores(ROOT, ignored_path):
+            failures.append(f".gitignore must effectively ignore {ignored_path}")
 
     readme_source = read("README.md")
     cocoapods_source_plan = read(

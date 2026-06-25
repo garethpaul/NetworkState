@@ -31,8 +31,9 @@ in reviewed repository documents.
 - Add the exact active `.explore/` directory pattern to `.gitignore`.
 - Parse active ignore entries without trimming their pattern bytes so comments
   and malformed leading whitespace cannot satisfy required ignore contracts.
-- Verify the representative path with pinned `git check-ignore --no-index` so
-  ordered negations and Git's real pattern semantics remain authoritative.
+- Verify both the directory and a representative file with pinned
+  `git check-ignore --no-index` so ordered negations, selective child
+  re-inclusion, and Git's real pattern semantics remain authoritative.
 - Document that local notes are not product source or durable review evidence.
 - Keep the change repository-local; do not delete or publish existing local
   intelligence files.

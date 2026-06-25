@@ -30,11 +30,13 @@ class GitignoreContractTests(unittest.TestCase):
             (root / ".explore").mkdir()
             (root / ".explore/REPO_MAP.md").touch()
 
+            self.assertTrue(CHECK_BASELINE.git_ignores(root, ".explore/"))
             self.assertTrue(
                 CHECK_BASELINE.git_ignores(root, ".explore/REPO_MAP.md")
             )
             with (root / ".gitignore").open("a", encoding="utf-8") as gitignore:
                 gitignore.write("!.explore/\n")
+            self.assertFalse(CHECK_BASELINE.git_ignores(root, ".explore/"))
             self.assertFalse(
                 CHECK_BASELINE.git_ignores(root, ".explore/REPO_MAP.md")
             )
