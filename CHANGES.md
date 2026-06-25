@@ -53,6 +53,11 @@ implementation.
 - First hosted pull-request run — macOS baseline, framework build, XCTest,
   CodeQL Actions, and CodeQL Python passed. A duplicate push-triggered baseline
   for the same head was canceled after the pull-request run became authoritative.
+- Final-review finding — Codex identified that the stale-tag regex missed
+  multiline `:tag =>` declarations and modern `tag:` Ruby hash syntax.
+- Review fix — parse Ruby code blocks into `NetworkState` pod declarations,
+  normalize declaration whitespace, and reject both tag syntaxes. Focused
+  modern-hash and multiline mutations now fail for the stale-tag contract.
 - Local Xcode remained unavailable and skipped truthfully. Merge remains
   conditional on clean exact-head review and successful final hosted reruns.
 

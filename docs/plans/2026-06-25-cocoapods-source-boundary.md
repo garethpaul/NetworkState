@@ -61,4 +61,8 @@ published CocoaPods trunk release.
 - The first pinning mutation command accidentally allowed shell backtick
   substitution and failed for the wrong reason; the safely quoted rerun was
   rejected for the intended missing guidance.
+- Exact-head Codex review found that the first stale-tag regex only caught a
+  single-line hash-rocket declaration. The corrected checker normalizes each
+  `NetworkState` declaration and rejects both multiline `:tag => '0.0.2'` and
+  modern `tag: '0.0.2'` syntax; focused hostile mutations cover both forms.
 - Complete local, hosted, and review evidence is recorded in `CHANGES.md`.

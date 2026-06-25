@@ -284,11 +284,20 @@ def main() -> int:
     ]:
         if fragment not in readme_source:
             failures.append(f"README CocoaPods source boundary must include {fragment}")
-    if re.search(
-        r"pod\s+['\"]NetworkState['\"].*:tag\s*=>\s*['\"]0\.0\.2['\"]",
-        readme_source,
-    ):
-        failures.append("README must not recommend the stale 0.0.2 source tag")
+    ruby_blocks = re.findall(r"```ruby\s+(.*?)```", readme_source, re.DOTALL)
+    for ruby_block in ruby_blocks:
+        declarations = re.findall(
+            r"^\s*pod\s*(?:\(\s*)?['\"]NetworkState['\"].*?(?=^\s*pod\b|\Z)",
+            ruby_block,
+            re.DOTALL | re.MULTILINE,
+        )
+        for declaration in declarations:
+            normalized_declaration = re.sub(r"\s+", " ", declaration)
+            if re.search(
+                r"(?::tag\s*=>|tag:)\s*['\"]0\.0\.2['\"]",
+                normalized_declaration,
+            ):
+                failures.append("README must not recommend the stale 0.0.2 source tag")
     if not all(
         evidence in cocoapods_source_plan.lower()
         for evidence in [
