@@ -117,6 +117,17 @@ def active_gitignore_patterns(source: str) -> set[str]:
     }
 
 
+def git_ignores(root: Path, path: str) -> bool:
+    result = subprocess.run(
+        ["/usr/bin/git", "check-ignore", "--quiet", "--no-index", path],
+        cwd=root,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
 def main() -> int:
     failures = []
     for path in REQUIRED:
@@ -281,6 +292,8 @@ def main() -> int:
     ]:
         if expected not in gitignore_patterns:
             failures.append(f".gitignore must include {expected}")
+    if not git_ignores(ROOT, ".explore/REPO_MAP.md"):
+        failures.append(".gitignore must effectively ignore .explore/ files")
 
     readme_source = read("README.md")
     cocoapods_source_plan = read(

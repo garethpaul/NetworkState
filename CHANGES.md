@@ -13,7 +13,7 @@ tracked repository documents.
 - Added the active `.explore/` directory pattern to `.gitignore`.
 - Extended the canonical ignore contract and made it reject commented-out
   patterns or leading-whitespace lookalikes rather than accepting normalized
-  raw substrings.
+  raw substrings, then added an effective Git check for ordered negations.
 - Documented the local-only intelligence boundary in contributor, setup,
   roadmap, and implementation-plan guidance.
 
@@ -27,7 +27,8 @@ tracked repository documents.
 
 - `.gitignore` — ignored repository-local `.explore/` files.
 - `scripts/check-baseline.py` — enforced active, non-comment ignore entries.
-- `tests/test_baseline_contracts.py` — covered comments and leading whitespace.
+- `tests/test_baseline_contracts.py` — covered comments, leading whitespace,
+  and later negation behavior.
 - `README.md` — distinguished local notes from source and durable evidence.
 - `AGENTS.md` — added the maintenance rule.
 - `VISION.md` — added the contribution guardrail.
@@ -59,6 +60,10 @@ tracked repository documents.
   framework build and XCTest suite, confirming runner-image variance.
 - The authoritative pull-request job was rerun unchanged and passed the full
   baseline, 13 Python tests, framework build, and XCTest suite in 2m23s.
+- Third exact-head Codex review — found that a later `!.explore/` rule could
+  disable Git's ignore behavior while leaving the textual contract satisfied.
+- Review fix — require pinned `git check-ignore --no-index` success for a
+  representative local-intelligence path and cover positive/negated behavior.
 
 ### Bugs / findings
 
@@ -67,6 +72,8 @@ tracked repository documents.
 - P2: the prior raw-substring ignore checker would accept a commented-out rule.
 - P2: the first active-pattern parser normalized leading whitespace and could
   accept a rule that Git would not apply.
+- P2: the textual contract did not account for ordered negation rules that can
+  disable an earlier `.explore/` pattern.
 
 ### Blockers
 

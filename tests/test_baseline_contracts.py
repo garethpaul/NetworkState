@@ -1,5 +1,7 @@
 import importlib.util
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
 
@@ -19,6 +21,23 @@ class GitignoreContractTests(unittest.TestCase):
             CHECK_BASELINE.active_gitignore_patterns(source),
             {" .explore/", ".explore-cache/", "DerivedData/"},
         )
+
+    def test_later_negation_disables_effective_ignore(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["/usr/bin/git", "init", "-q"], cwd=root, check=True)
+            (root / ".gitignore").write_text(".explore/\n", encoding="utf-8")
+            (root / ".explore").mkdir()
+            (root / ".explore/REPO_MAP.md").touch()
+
+            self.assertTrue(
+                CHECK_BASELINE.git_ignores(root, ".explore/REPO_MAP.md")
+            )
+            with (root / ".gitignore").open("a", encoding="utf-8") as gitignore:
+                gitignore.write("!.explore/\n")
+            self.assertFalse(
+                CHECK_BASELINE.git_ignores(root, ".explore/REPO_MAP.md")
+            )
 
 
 if __name__ == "__main__":
