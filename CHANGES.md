@@ -53,8 +53,8 @@ implementation.
 - First hosted pull-request run — macOS baseline, framework build, XCTest,
   CodeQL Actions, and CodeQL Python passed. A duplicate push-triggered baseline
   for the same head was canceled after the pull-request run became authoritative.
-- Local Xcode remained unavailable and skipped truthfully. Final exact-head
-  review and hosted reruns remain required after this evidence update.
+- Local Xcode remained unavailable and skipped truthfully. Merge remains
+  conditional on clean exact-head review and successful final hosted reruns.
 
 ### Bugs / findings
 
@@ -68,8 +68,8 @@ implementation.
 
 ### Next action
 
-- Re-run exact-head review and require final hosted baseline and CodeQL success
-  before merge.
+- Merge only after clean exact-head review and final hosted baseline and CodeQL
+  success.
 
 ## 2026-06-21
 
