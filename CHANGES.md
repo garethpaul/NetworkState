@@ -1,5 +1,71 @@
 # Changes
 
+## 2026-06-25 12:12 PDT - P2 - Clarify current CocoaPods source
+
+### Summary
+
+Documented that the checked-in root podspec describes current default-branch
+source while the historical `0.0.2` tag still resolves the original 2016 Swift
+implementation.
+
+### Work completed
+
+- Added a current-branch Git Podfile example without claiming CocoaPods trunk
+  publication.
+- Added reviewed-commit pinning guidance for reproducible builds.
+- Added exact positive and stale-tag regression contracts plus maintenance and
+  roadmap boundaries.
+
+### Threads
+
+- Started: none; the package-source documentation gap was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `README.md` — added current source, stale-tag, trunk, and pinning guidance.
+- `scripts/check-baseline.py` — enforced the exact package-source boundary.
+- `AGENTS.md` — recorded the historical-tag maintenance rule.
+- `VISION.md` — recorded the package release boundary.
+- `docs/plans/2026-06-25-cocoapods-source-boundary.md` — recorded evidence,
+  scope, and verification.
+
+### Validation
+
+- Initial baseline check — failed on the missing plan.
+- Second red baseline check — after adding scope evidence, reported five missing
+  README fragments plus incomplete verification evidence.
+- First green attempt — exposed an overbroad stale-tag check that also rejected
+  explanatory prose; narrowed it to actual `pod 'NetworkState'` tag syntax.
+- Three hostile mutations — stale tag, CocoaPods trunk overclaim, and weakened
+  reviewed-commit guidance were rejected for the intended contract failures.
+- The first pinning mutation command allowed shell backtick substitution and
+  failed for the wrong reason; the safely quoted rerun passed the intended
+  rejection assertion.
+- All six Make aliases passed from the repository root and an external working
+  directory; each run included the baseline and all 12 Python policy tests.
+- Python bytecode compilation and `git diff --check` passed. Validation-created
+  bytecode plus the empty file produced by the misquoted mutation command were
+  removed before review.
+- Local Xcode remained unavailable and skipped truthfully. Hosted Xcode tests
+  and exact-head review remain pending.
+
+### Bugs / findings
+
+- P2: consumers could reasonably treat root podspec version `0.0.2` as evidence
+  that the same-named immutable tag contained the current implementation.
+
+### Blockers
+
+- Local Linux cannot run Xcode or CocoaPods lint; hosted macOS remains
+  authoritative for the existing framework build and XCTest truth table.
+
+### Next action
+
+- Open the pull request, run exact-head review, and require hosted baseline and
+  Xcode success before merge.
+
 ## 2026-06-21
 
 - Preserved the complete checkout root for absolute Makefile paths containing

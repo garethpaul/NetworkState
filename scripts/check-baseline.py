@@ -97,6 +97,7 @@ REQUIRED = [
     "docs/plans/2026-06-15-reachability-decision-truth-table.md",
     "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
     "docs/plans/2026-06-21-spaced-makefile-path.md",
+    "docs/plans/2026-06-25-cocoapods-source-boundary.md",
     "docs/readme-overview.svg",
     "tests/test_makefile_root.py",
 ]
@@ -271,6 +272,35 @@ def main() -> int:
             failures.append(f".gitignore must include {expected}")
 
     readme_source = read("README.md")
+    cocoapods_source_plan = read(
+        "docs/plans/2026-06-25-cocoapods-source-boundary.md"
+    )
+    for fragment in [
+        "### CocoaPods Source Boundary",
+        "pod 'NetworkState', :git => 'https://github.com/garethpaul/NetworkState.git', :branch => 'master'",
+        "The checked-in root podspec describes the current source, but its `0.0.2` version matches a historical tag that predates the current Swift implementation and tests.",
+        "replace `:branch => 'master'` with a reviewed commit",
+        "does not claim that `NetworkState` is available from the CocoaPods trunk",
+    ]:
+        if fragment not in readme_source:
+            failures.append(f"README CocoaPods source boundary must include {fragment}")
+    if re.search(
+        r"pod\s+['\"]NetworkState['\"].*:tag\s*=>\s*['\"]0\.0\.2['\"]",
+        readme_source,
+    ):
+        failures.append("README must not recommend the stale 0.0.2 source tag")
+    if not all(
+        evidence in cocoapods_source_plan.lower()
+        for evidence in [
+            "status: completed",
+            "historical 0.0.2 tag",
+            "reviewed commit",
+            "hostile mutations",
+        ]
+    ):
+        failures.append(
+            "CocoaPods source-boundary plan must record completed tag, pinning, and mutation evidence"
+        )
     docs = readme_source + "\n" + read("VISION.md") + "\n" + read("SECURITY.md")
     location_independent_make_plan = read(
         "docs/plans/2026-06-13-location-independent-make.md"
