@@ -1,5 +1,99 @@
 # Changes
 
+## 2026-06-25 14:54 PDT - P2 - Ignore local repository intelligence
+
+### Summary
+
+Kept maintainer-local `.explore/` notes out of source-control status and
+accidental pull-request changes while requiring durable decisions to remain in
+tracked repository documents.
+
+### Work completed
+
+- Added the active `.explore/` directory pattern to `.gitignore`.
+- Extended the canonical ignore contract and made it reject commented-out
+  patterns or leading-whitespace lookalikes rather than accepting normalized
+  raw substrings, then added an effective Git check for ordered negations.
+- Rejected force-added or historical tracked `.explore` files through a pinned
+  `git ls-files` query.
+- Documented the local-only intelligence boundary in contributor, setup,
+  roadmap, and implementation-plan guidance.
+
+### Threads
+
+- Started: local repository intelligence ignore boundary.
+- Continued: canonical baseline ownership of local and generated artifacts.
+- Stopped: none.
+
+### Files changed
+
+- `.gitignore` — ignored repository-local `.explore/` files.
+- `scripts/check-baseline.py` — enforced active, non-comment ignore entries.
+- `tests/test_baseline_contracts.py` — covered comments, leading whitespace,
+  later negation behavior, and force-added tracked files.
+- `README.md` — distinguished local notes from source and durable evidence.
+- `AGENTS.md` — added the maintenance rule.
+- `VISION.md` — added the contribution guardrail.
+- `docs/plans/2026-06-25-local-intelligence-ignore.md` — recorded evidence,
+  decisions, verification, and risk.
+- `CHANGES.md` — recorded this P2 cycle.
+
+### Validation
+
+- Red-first baseline — failed with `.gitignore must include .explore/` before
+  the active ignore rule was added.
+- Red-first unit regression — failed because the active-pattern parser helper
+  did not yet exist.
+- Commented-rule hostile mutation — failed with the intended missing-pattern
+  error after the active rule was temporarily commented out.
+- All six Make aliases passed from the repository root and an external working
+  directory; each run included the baseline and 13 Python policy tests.
+- Direct Python discovery, syntax parsing, `git check-ignore`, and
+  `git diff --check` passed.
+- First exact-head Codex review — found that trimming leading whitespace could
+  accept ` .explore/` even though Git would not apply it to `.explore/foo`.
+- Review fix — preserve pattern bytes, ignore only actual comment lines, and
+  cover the malformed leading-space rule in the permanent unit regression.
+- Second exact-head Codex review — clean on
+  `fddb68246ed08e5f342aeca2bba8cedc40a08941` with no actionable findings.
+- CodeQL Actions and Python passed on the corrected exact head.
+- The first pull-request macOS runner exposed no installed iOS simulator and
+  failed before compilation; the duplicate exact-head push job passed the full
+  framework build and XCTest suite, confirming runner-image variance.
+- The authoritative pull-request job was rerun unchanged and passed the full
+  baseline, 13 Python tests, framework build, and XCTest suite in 2m23s.
+- Third exact-head Codex review — found that a later `!.explore/` rule could
+  disable Git's ignore behavior while leaving the textual contract satisfied.
+- Review fix — require pinned `git check-ignore --no-index` success for both
+  the directory and a representative file, covering positive, negated, and
+  selective child re-inclusion behavior.
+- Fourth exact-head Codex review — found that `--no-index` intentionally masks
+  force-added or historical tracked `.explore` files.
+- Review fix — query the index with pinned `git ls-files`, fail closed on query
+  errors, and reject every tracked local-intelligence path.
+
+### Bugs / findings
+
+- P2: persistent local intelligence appeared as untracked source in every
+  checkout and could be staged or published accidentally.
+- P2: the prior raw-substring ignore checker would accept a commented-out rule.
+- P2: the first active-pattern parser normalized leading whitespace and could
+  accept a rule that Git would not apply.
+- P2: the textual contract did not account for ordered negation rules that can
+  disable an earlier `.explore/` pattern.
+- P2: effective ignore checks alone did not reject already tracked `.explore`
+  files because `--no-index` intentionally ignores index state.
+
+### Blockers
+
+- Local Linux cannot run Xcode; hosted macOS remains authoritative for the
+  framework build and XCTest truth table.
+
+### Next action
+
+- Rerun exact-head review and hosted checks for this evidence-only update, then
+  merge if they remain clean.
+
 ## 2026-06-25 12:12 PDT - P2 - Clarify current CocoaPods source
 
 ### Summary

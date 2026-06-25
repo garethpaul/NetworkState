@@ -52,6 +52,10 @@ make build
 make check
 ```
 
+Repository-local `.explore/` files contain maintainer working notes and are
+ignored intentionally. They are not product source, package input, or review
+evidence; durable decisions belong in tracked plans, changes, and policies.
+
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
 ### CocoaPods Source Boundary

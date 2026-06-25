@@ -98,13 +98,48 @@ REQUIRED = [
     "docs/plans/2026-06-15-wwan-reachability-flag-matrix.md",
     "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/plans/2026-06-25-cocoapods-source-boundary.md",
+    "docs/plans/2026-06-25-local-intelligence-ignore.md",
     "docs/readme-overview.svg",
+    "tests/test_baseline_contracts.py",
     "tests/test_makefile_root.py",
 ]
 
 
 def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8", errors="replace")
+
+
+def active_gitignore_patterns(source: str) -> set[str]:
+    return {
+        line
+        for line in source.splitlines()
+        if line and not line.startswith("#")
+    }
+
+
+def git_ignores(root: Path, path: str) -> bool:
+    result = subprocess.run(
+        ["/usr/bin/git", "check-ignore", "--quiet", "--no-index", path],
+        cwd=root,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def git_tracked_paths(root: Path, pathspec: str) -> list[str]:
+    result = subprocess.run(
+        ["/usr/bin/git", "ls-files", "--", pathspec],
+        cwd=root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return [f"<git ls-files failed with {result.returncode}>"]
+    return result.stdout.splitlines()
 
 
 def main() -> int:
@@ -256,7 +291,7 @@ def main() -> int:
     ):
         failures.append("shared framework scheme must build the NetworkState framework target")
 
-    gitignore = read(".gitignore")
+    gitignore_patterns = active_gitignore_patterns(read(".gitignore"))
     for expected in [
         "DerivedData/",
         "*.local.xcconfig",
@@ -267,9 +302,19 @@ def main() -> int:
         "*.p8",
         ".xcode.env.local",
         ".env",
+        ".explore/",
     ]:
-        if expected not in gitignore:
+        if expected not in gitignore_patterns:
             failures.append(f".gitignore must include {expected}")
+    for ignored_path in [".explore/", ".explore/REPO_MAP.md"]:
+        if not git_ignores(ROOT, ignored_path):
+            failures.append(f".gitignore must effectively ignore {ignored_path}")
+    tracked_explore_paths = git_tracked_paths(ROOT, ".explore")
+    if tracked_explore_paths:
+        failures.append(
+            ".explore must not contain tracked files: "
+            + ", ".join(tracked_explore_paths)
+        )
 
     readme_source = read("README.md")
     cocoapods_source_plan = read(

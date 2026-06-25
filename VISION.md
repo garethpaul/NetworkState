@@ -77,6 +77,8 @@ Contribution rules:
 - Preserve deployment target alignment when changing package metadata.
 - Preserve framework version alignment when changing release metadata.
 - Preserve the shared framework scheme when changing Xcode project metadata.
+- Preserve the `.explore/` local-intelligence ignore boundary and record
+  durable maintenance decisions in tracked repository documents.
 
 ## Security
 

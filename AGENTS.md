@@ -33,4 +33,6 @@ This repository maintains a small Swift wrapper around legacy
 - Do not recommend the historical `0.0.2` tag as current source; package
   guidance must distinguish mutable branch installs from reviewed commit pins.
 - Keep checkout credentials disabled and the single hosted workflow intact.
+- Keep repository-local `.explore/` intelligence ignored; move durable
+  decisions into tracked plans, changes, or policies.
 - Record skipped device, carrier, captive-portal, and live-service validation.
