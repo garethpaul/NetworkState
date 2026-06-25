@@ -14,6 +14,8 @@ tracked repository documents.
 - Extended the canonical ignore contract and made it reject commented-out
   patterns or leading-whitespace lookalikes rather than accepting normalized
   raw substrings, then added an effective Git check for ordered negations.
+- Rejected force-added or historical tracked `.explore` files through a pinned
+  `git ls-files` query.
 - Documented the local-only intelligence boundary in contributor, setup,
   roadmap, and implementation-plan guidance.
 
@@ -28,7 +30,7 @@ tracked repository documents.
 - `.gitignore` — ignored repository-local `.explore/` files.
 - `scripts/check-baseline.py` — enforced active, non-comment ignore entries.
 - `tests/test_baseline_contracts.py` — covered comments, leading whitespace,
-  and later negation behavior.
+  later negation behavior, and force-added tracked files.
 - `README.md` — distinguished local notes from source and durable evidence.
 - `AGENTS.md` — added the maintenance rule.
 - `VISION.md` — added the contribution guardrail.
@@ -65,6 +67,10 @@ tracked repository documents.
 - Review fix — require pinned `git check-ignore --no-index` success for both
   the directory and a representative file, covering positive, negated, and
   selective child re-inclusion behavior.
+- Fourth exact-head Codex review — found that `--no-index` intentionally masks
+  force-added or historical tracked `.explore` files.
+- Review fix — query the index with pinned `git ls-files`, fail closed on query
+  errors, and reject every tracked local-intelligence path.
 
 ### Bugs / findings
 
@@ -75,6 +81,8 @@ tracked repository documents.
   accept a rule that Git would not apply.
 - P2: the textual contract did not account for ordered negation rules that can
   disable an earlier `.explore/` pattern.
+- P2: effective ignore checks alone did not reject already tracked `.explore`
+  files because `--no-index` intentionally ignores index state.
 
 ### Blockers
 

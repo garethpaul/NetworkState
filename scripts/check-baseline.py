@@ -128,6 +128,20 @@ def git_ignores(root: Path, path: str) -> bool:
     return result.returncode == 0
 
 
+def git_tracked_paths(root: Path, pathspec: str) -> list[str]:
+    result = subprocess.run(
+        ["/usr/bin/git", "ls-files", "--", pathspec],
+        cwd=root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return [f"<git ls-files failed with {result.returncode}>"]
+    return result.stdout.splitlines()
+
+
 def main() -> int:
     failures = []
     for path in REQUIRED:
@@ -295,6 +309,12 @@ def main() -> int:
     for ignored_path in [".explore/", ".explore/REPO_MAP.md"]:
         if not git_ignores(ROOT, ignored_path):
             failures.append(f".gitignore must effectively ignore {ignored_path}")
+    tracked_explore_paths = git_tracked_paths(ROOT, ".explore")
+    if tracked_explore_paths:
+        failures.append(
+            ".explore must not contain tracked files: "
+            + ", ".join(tracked_explore_paths)
+        )
 
     readme_source = read("README.md")
     cocoapods_source_plan = read(

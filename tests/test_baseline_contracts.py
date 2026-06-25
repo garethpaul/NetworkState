@@ -41,6 +41,24 @@ class GitignoreContractTests(unittest.TestCase):
                 CHECK_BASELINE.git_ignores(root, ".explore/REPO_MAP.md")
             )
 
+    def test_force_added_explore_files_are_tracked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["/usr/bin/git", "init", "-q"], cwd=root, check=True)
+            (root / ".gitignore").write_text(".explore/\n", encoding="utf-8")
+            (root / ".explore").mkdir()
+            (root / ".explore/REPO_MAP.md").touch()
+            subprocess.run(
+                ["/usr/bin/git", "add", "-f", ".explore/REPO_MAP.md"],
+                cwd=root,
+                check=True,
+            )
+
+            self.assertEqual(
+                CHECK_BASELINE.git_tracked_paths(root, ".explore"),
+                [".explore/REPO_MAP.md"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,8 @@ in reviewed repository documents.
   the required canonical pattern inside the checker.
 - A later `!.explore/` negation can disable the directory rule even when the
   canonical text remains present.
+- `git check-ignore --no-index` intentionally ignores index state, so a
+  force-added or historical tracked file needs a separate repository query.
 
 ## Decisions
 
@@ -34,6 +36,7 @@ in reviewed repository documents.
 - Verify both the directory and a representative file with pinned
   `git check-ignore --no-index` so ordered negations, selective child
   re-inclusion, and Git's real pattern semantics remain authoritative.
+- Reject every tracked `.explore` path reported by pinned `git ls-files`.
 - Document that local notes are not product source or durable review evidence.
 - Keep the change repository-local; do not delete or publish existing local
   intelligence files.
@@ -48,6 +51,7 @@ in reviewed repository documents.
   it, then restore the active rule.
 - Prove a leading-space rule remains distinct from the required canonical rule.
 - Prove a later negation disables the effective ignore check.
+- Prove a force-added local-intelligence file is detected as tracked.
 - Run every Make alias from the root and an external working directory.
 - Require exact-head Codex review and hosted Xcode/CodeQL success before merge.
 
@@ -68,7 +72,8 @@ in reviewed repository documents.
   Python policy tests per invocation.
 - Codex found and prompted the leading-whitespace correction; the corrected
   exact head received a clean follow-up review. A later review found the
-  negation bypass, which is now covered through effective Git behavior.
+  negation bypass, which is now covered through effective Git behavior. The
+  next review found the tracked-file boundary, now covered through index state.
 - CodeQL Actions/Python and both exact-head macOS jobs passed. One initial PR
   runner lacked an installed simulator; an unchanged rerun passed the complete
   framework build and XCTest suite, confirming transient runner variance.
