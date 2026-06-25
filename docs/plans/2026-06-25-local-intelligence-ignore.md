@@ -51,3 +51,17 @@ in reviewed repository documents.
   must therefore be copied into tracked plans, changes, policies, or source.
 - This change does not alter reachability behavior, public API, package version,
   Xcode settings, or hosted tool authority.
+
+## Verification Result
+
+- The red-first baseline rejected the absent `.explore/` rule.
+- The red-first unit regression rejected the missing active-pattern helper.
+- Commented and leading-space lookalikes were rejected for the intended
+  canonical-pattern boundary.
+- All six Make aliases passed from root and an external directory with 13
+  Python policy tests per invocation.
+- Codex found and prompted the leading-whitespace correction; the corrected
+  exact head received a clean follow-up review.
+- CodeQL Actions/Python and both exact-head macOS jobs passed. One initial PR
+  runner lacked an installed simulator; an unchanged rerun passed the complete
+  framework build and XCTest suite, confirming transient runner variance.

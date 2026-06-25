@@ -51,7 +51,14 @@ tracked repository documents.
   accept ` .explore/` even though Git would not apply it to `.explore/foo`.
 - Review fix — preserve pattern bytes, ignore only actual comment lines, and
   cover the malformed leading-space rule in the permanent unit regression.
-- Hosted and exact-head review validation is pending.
+- Second exact-head Codex review — clean on
+  `fddb68246ed08e5f342aeca2bba8cedc40a08941` with no actionable findings.
+- CodeQL Actions and Python passed on the corrected exact head.
+- The first pull-request macOS runner exposed no installed iOS simulator and
+  failed before compilation; the duplicate exact-head push job passed the full
+  framework build and XCTest suite, confirming runner-image variance.
+- The authoritative pull-request job was rerun unchanged and passed the full
+  baseline, 13 Python tests, framework build, and XCTest suite in 2m23s.
 
 ### Bugs / findings
 
@@ -68,8 +75,8 @@ tracked repository documents.
 
 ### Next action
 
-- Complete hostile ignore mutation, local gates, exact-head review, and hosted
-  checks; merge only when all evidence is clean.
+- Rerun exact-head review and hosted checks for this evidence-only update, then
+  merge if they remain clean.
 
 ## 2026-06-25 12:12 PDT - P2 - Clarify current CocoaPods source
 
