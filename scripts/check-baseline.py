@@ -100,6 +100,8 @@ REQUIRED = [
     "docs/plans/2026-06-25-cocoapods-source-boundary.md",
     "docs/plans/2026-06-25-local-intelligence-ignore.md",
     "docs/plans/2026-06-26-deterministic-snapshot-provider.md",
+    "docs/plans/2026-06-26-network-test-roadmap-design.md",
+    "docs/plans/2026-06-26-network-test-roadmap.md",
     "docs/readme-overview.svg",
     "tests/test_baseline_contracts.py",
     "tests/test_makefile_root.py",
@@ -625,6 +627,17 @@ def main() -> int:
     snapshot_plan = read("docs/plans/2026-06-26-deterministic-snapshot-provider.md")
     if "Status: Completed" not in snapshot_plan or "make check" not in snapshot_plan:
         failures.append("deterministic snapshot provider plan must record completed verification")
+    network_test_plan = read("docs/plans/2026-06-26-network-test-roadmap.md")
+    if "status: completed" not in network_test_plan.lower() or "make check" not in network_test_plan:
+        failures.append("network test roadmap plan must record completed verification")
+    snapshot_guidance = "Deterministic snapshots cover unavailable and reachable routes without live-network dependence."
+    constrained_guidance = "Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration."
+    for relative_path in ["AGENTS.md", "README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
+        source = read(relative_path)
+        if snapshot_guidance not in source or constrained_guidance not in source:
+            failures.append(f"{relative_path} must document the network test roadmap boundary")
+    if "Add tests for offline, online, and constrained network cases where practical" in read("VISION.md"):
+        failures.append("VISION.md must retire the completed and incompatible network test roadmap item")
     documentation_contracts = {
         "README.md": "unavailable snapshots fail closed",
         "SECURITY.md": "Missing SystemConfiguration flag snapshots must fail closed",

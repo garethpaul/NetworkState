@@ -1,5 +1,65 @@
 # Changes
 
+## 2026-06-26 13:06 PDT - P2 - Reconcile network test roadmap
+
+### Summary
+
+Retired a stale roadmap item after the deterministic snapshot suite covered
+unavailable and reachable route states, while documenting that Low Data Mode
+and constrained-path state belong to a different Apple framework boundary.
+
+### Work completed
+
+- Deterministic snapshots cover unavailable and reachable routes without live-network dependence.
+- Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration.
+- Removed the combined offline/online/constrained roadmap item without changing
+  the public Boolean API, iOS 8 package boundary, or Swift implementation.
+- Added design and implementation records backed by Apple SystemConfiguration
+  and Network framework documentation.
+
+### Threads
+
+- Started: none; the documentation reconciliation was handled directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `AGENTS.md`, `README.md`, `SECURITY.md`, and `VISION.md` — document the
+  completed snapshot coverage and constrained-path compatibility boundary.
+- `scripts/check-baseline.py` — enforce exact guidance, roadmap retirement, and
+  completed-plan evidence.
+- `docs/plans/2026-06-26-network-test-roadmap-design.md` and
+  `docs/plans/2026-06-26-network-test-roadmap.md` — record the decision and plan.
+- `CHANGES.md` — record this maintenance cycle.
+
+### Validation
+
+- Red-first `make check` rejected the pending plan, missing guidance in all five
+  maintained documents, and stale roadmap item before documentation changes.
+- Four isolated hostile mutations for stale roadmap text, missing constrained
+  guidance, missing snapshot guidance, and incomplete-plan evidence were
+  rejected.
+- All six Make aliases passed from the repository root and an external
+  directory, each including the baseline and 19 Python policy tests.
+- Local Xcode remains unavailable, so hosted framework compilation and XCTest
+  remain required before merge.
+
+### Bugs / findings
+
+- P2 documentation correctness: the roadmap grouped already-covered unavailable
+  and reachable snapshots with constrained-path state that the maintained
+  `SCNetworkReachabilityFlags` API cannot represent.
+
+### Blockers
+
+- Testing Low Data Mode or other constrained paths requires a separately
+  reviewed Network framework and deployment-compatibility decision.
+
+### Next action
+
+- Complete all validation and merge only the exact unchanged green PR head.
+
 ## 2026-06-26 04:35 PDT - P2 - Deterministic reachability snapshot coverage
 
 ### Summary

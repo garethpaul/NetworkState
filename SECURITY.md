@@ -35,6 +35,8 @@ Helpful reports include:
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
 - Missing SystemConfiguration flag snapshots must fail closed, with tests using
   the internal provider seam rather than inferring behavior from the host route.
+- Deterministic snapshots cover unavailable and reachable routes without live-network dependence.
+- Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.
 - Combined automatic connection flags should stay covered so on-demand and
