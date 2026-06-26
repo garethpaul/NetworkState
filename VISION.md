@@ -20,6 +20,7 @@ Priority:
 - Keep podspec, Xcode project, and README usage aligned
 - Maintain test coverage for the helper behavior
 - Keep reachability flag evaluation covered by deterministic tests
+- Keep snapshot acquisition failure covered without a live network dependency
 - Keep automatic connection reachability flags covered without live network state
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests

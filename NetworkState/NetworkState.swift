@@ -10,22 +10,31 @@ import SystemConfiguration
 
 public class NetworkState {
     public class func isConnectedToNetwork() -> Bool {
-        var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-        zeroAddress.sin_family = sa_family_t(AF_INET)
+        return isConnectedToNetwork(flagsProvider: {
+            var zeroAddress = sockaddr_in()
+            zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+            zeroAddress.sin_family = sa_family_t(AF_INET)
 
-        let defaultRouteReachability = withUnsafePointer(to: &zeroAddress) {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                SCNetworkReachabilityCreateWithAddress(nil, $0)
+            let defaultRouteReachability = withUnsafePointer(to: &zeroAddress) {
+                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                    SCNetworkReachabilityCreateWithAddress(nil, $0)
+                }
             }
-        }
 
-        guard let reachability = defaultRouteReachability else {
-            return false
-        }
+            guard let reachability = defaultRouteReachability else {
+                return nil
+            }
 
-        var flags = SCNetworkReachabilityFlags()
-        if !SCNetworkReachabilityGetFlags(reachability, &flags) {
+            var flags = SCNetworkReachabilityFlags()
+            guard SCNetworkReachabilityGetFlags(reachability, &flags) else {
+                return nil
+            }
+            return flags
+        })
+    }
+
+    class func isConnectedToNetwork(flagsProvider: () -> SCNetworkReachabilityFlags?) -> Bool {
+        guard let flags = flagsProvider() else {
             return false
         }
         return isReachableWithFlags(flags)

@@ -8,13 +8,26 @@
 
 import XCTest
 import SystemConfiguration
-import NetworkState
+@testable import NetworkState
 
 class NetworkStateTests: XCTestCase {
 
-    func testConnectivityCheckReturnsBoolean() {
-        let result = NetworkState.isConnectedToNetwork()
-        XCTAssertTrue(result || !result)
+    func testMissingReachabilitySnapshotIsUnavailable() {
+        XCTAssertFalse(NetworkState.isConnectedToNetwork(flagsProvider: { nil }))
+    }
+
+    func testProvidedReachabilitySnapshotUsesSharedEvaluator() {
+        let reachable = SCNetworkReachabilityFlags.reachable
+        let unavailable = SCNetworkReachabilityFlags()
+
+        XCTAssertEqual(
+            NetworkState.isConnectedToNetwork(flagsProvider: { reachable }),
+            NetworkState.isReachableWithFlags(reachable)
+        )
+        XCTAssertEqual(
+            NetworkState.isConnectedToNetwork(flagsProvider: { unavailable }),
+            NetworkState.isReachableWithFlags(unavailable)
+        )
     }
 
     func testReachabilityFlagEvaluation() {

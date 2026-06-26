@@ -77,6 +77,9 @@ repository does not claim that `NetworkState` is available from the CocoaPods tr
 
 - Import the framework and call `NetworkState.isConnectedToNetwork()` to receive a local boolean connectivity signal.
 - `NetworkState.isReachableWithFlags(_:)` keeps reachability flag evaluation testable for fixture-style checks.
+- Deterministic XCTest supplies optional flag snapshots through an internal
+  provider seam, proving unavailable snapshots fail closed and supplied flags
+  use the same public evaluator without depending on the host network.
 - Automatic connection reachability flags are considered reachable when no user intervention is required.
 - Automatic connection handling still requires the reachable flag, so connection-on-demand flags alone do not report connectivity.
 - Combined automatic connection flags remain reachable when the base reachable
@@ -161,7 +164,8 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16 Pro' ./build.sh
   enforce those provider-side settings by itself.
 - `./build.sh` on macOS with Xcode
 - `pod spec lint NetworkState.podspec` when preparing CocoaPods release metadata
-- XCTest coverage includes reachable, connection-required, and unreachable reachability flag combinations.
+- XCTest coverage includes unavailable snapshots plus reachable,
+  connection-required, and unreachable reachability flag combinations.
 
 The Make targets run the same SDK-free static baseline on non-macOS hosts. Use
 `./build.sh` or Xcode for the full framework test run when the legacy toolchain
