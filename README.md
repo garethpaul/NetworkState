@@ -80,6 +80,8 @@ repository does not claim that `NetworkState` is available from the CocoaPods tr
 - Deterministic XCTest supplies optional flag snapshots through an internal
   provider seam, proving unavailable snapshots fail closed and supplied flags
   use the same public evaluator without depending on the host network.
+- Deterministic snapshots cover unavailable and reachable routes without live-network dependence.
+- Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration.
 - Automatic connection reachability flags are considered reachable when no user intervention is required.
 - Automatic connection handling still requires the reachable flag, so connection-on-demand flags alone do not report connectivity.
 - Combined automatic connection flags remain reachable when the base reachable

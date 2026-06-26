@@ -21,6 +21,8 @@ Priority:
 - Maintain test coverage for the helper behavior
 - Keep reachability flag evaluation covered by deterministic tests
 - Keep snapshot acquisition failure covered without a live network dependency
+- Deterministic snapshots cover unavailable and reachable routes without live-network dependence.
+- Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration.
 - Keep automatic connection reachability flags covered without live network state
 - Keep automatic connection behavior constrained so it requires the reachable flag
 - Keep combined automatic connection flags covered in fixture tests
@@ -58,7 +60,6 @@ Priority:
 Next priorities:
 
 - Modernize Swift/project settings in a dedicated pass
-- Add tests for offline, online, and constrained network cases where practical
 - Run `pod spec lint NetworkState.podspec` on macOS before any package release
 
 Contribution rules:

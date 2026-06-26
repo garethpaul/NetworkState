@@ -27,6 +27,8 @@ This repository maintains a small Swift wrapper around legacy
   service availability.
 - Preserve deterministic nil/supplied snapshot tests; do not replace them with
   tautological assertions against the host's live connectivity.
+- Deterministic snapshots cover unavailable and reachable routes without live-network dependence.
+- Constrained-path state is not represented by SCNetworkReachabilityFlags; testing it requires a separately reviewed Network framework migration.
 
 ## Maintenance
 
