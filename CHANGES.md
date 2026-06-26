@@ -1,5 +1,58 @@
 # Changes
 
+## 2026-06-26 04:35 PDT - P2 - Deterministic reachability snapshot coverage
+
+### Summary
+
+Replaced a tautological live-network Boolean assertion with deterministic
+coverage for unavailable and supplied SystemConfiguration flag snapshots.
+
+### Work completed
+
+- Added an internal closure-based snapshot seam while preserving the public
+  `isConnectedToNetwork()` Boolean API.
+- Routed reachability creation and flag-fetch failures through a nil snapshot
+  that fails closed.
+- Added XCTest for nil and supplied snapshots plus four portable mutation
+  contracts that reject missing guards, evaluator bypass, and tautological
+  tests.
+
+### Threads
+
+- Started: none; the focused testability gap was handled directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `NetworkState/NetworkState.swift` — extracted deterministic snapshot evaluation.
+- `NetworkStateTests/NetworkStateTests.swift` — replaced the vacuous live-route test.
+- `scripts/check-baseline.py`, `tests/test_baseline_contracts.py` — added contracts and mutations.
+- `README.md`, `SECURITY.md`, `VISION.md`, `AGENTS.md` — documented the boundary.
+- `docs/plans/2026-06-26-deterministic-snapshot-provider.md` — recorded the implementation plan.
+
+### Validation
+
+- RED baseline and focused test failed on the missing provider seam.
+- The repaired baseline, all four focused mutation contracts, all 19 Python
+  policy tests, root and external-directory `make check`, Python compilation,
+  and `git diff --check` pass. Local Xcode/XCTest skip because `xcodebuild` is
+  unavailable; hosted macOS and CodeQL remain merge gates.
+
+### Bugs / findings
+
+- The removed test asserted `result || !result`, which can never detect a
+  reachability regression or exercise the flag-fetch failure path.
+
+### Blockers
+
+- Live device, carrier, captive-portal, and service reachability remain outside
+  deterministic unit-test scope.
+
+### Next action
+
+- Run root, external, and hosted gates, then merge only the exact reviewed head.
+
 ## 2026-06-25 14:54 PDT - P2 - Ignore local repository intelligence
 
 ### Summary

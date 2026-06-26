@@ -33,6 +33,8 @@ Helpful reports include:
   observer, or teardown lifecycle; callers must request a fresh snapshot when
   their own application lifecycle requires one.
 - Reachability flag evaluation should remain deterministic and covered without live network telemetry.
+- Missing SystemConfiguration flag snapshots must fail closed, with tests using
+  the internal provider seam rather than inferring behavior from the host route.
 - Automatic connection reachability flags should be evaluated locally and covered without live network telemetry.
 - Automatic connection handling should still require the reachable flag before reporting connectivity.
 - Combined automatic connection flags should stay covered so on-demand and

@@ -99,6 +99,7 @@ REQUIRED = [
     "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/plans/2026-06-25-cocoapods-source-boundary.md",
     "docs/plans/2026-06-25-local-intelligence-ignore.md",
+    "docs/plans/2026-06-26-deterministic-snapshot-provider.md",
     "docs/readme-overview.svg",
     "tests/test_baseline_contracts.py",
     "tests/test_makefile_root.py",
@@ -142,6 +143,34 @@ def git_tracked_paths(root: Path, pathspec: str) -> list[str]:
     return result.stdout.splitlines()
 
 
+def reachability_snapshot_contract_errors(swift: str, tests: str) -> list[str]:
+    errors = []
+    required_source = [
+        "class func isConnectedToNetwork(flagsProvider: () -> SCNetworkReachabilityFlags?) -> Bool",
+        "guard let flags = flagsProvider() else",
+        "return isReachableWithFlags(flags)",
+        "return isConnectedToNetwork(flagsProvider:",
+    ]
+    for contract in required_source:
+        if contract not in swift:
+            errors.append(f"deterministic reachability snapshot contract is missing: {contract}")
+
+    required_tests = [
+        "@testable import NetworkState",
+        "testMissingReachabilitySnapshotIsUnavailable",
+        "NetworkState.isConnectedToNetwork(flagsProvider: { nil })",
+        "testProvidedReachabilitySnapshotUsesSharedEvaluator",
+        "NetworkState.isReachableWithFlags(reachable)",
+        "NetworkState.isReachableWithFlags(unavailable)",
+    ]
+    for contract in required_tests:
+        if contract not in tests:
+            errors.append(f"deterministic reachability snapshot test is missing: {contract}")
+    if "result || !result" in tests:
+        errors.append("tests must not use a tautological Boolean connectivity assertion")
+    return errors
+
+
 def main() -> int:
     failures = []
     for path in REQUIRED:
@@ -149,6 +178,8 @@ def main() -> int:
             failures.append(f"required file missing: {path}")
 
     swift = read("NetworkState/NetworkState.swift")
+    tests = read("NetworkStateTests/NetworkStateTests.swift")
+    failures.extend(reachability_snapshot_contract_errors(swift, tests))
     if "public class func isConnectedToNetwork() -> Bool" not in swift:
         failures.append("isConnectedToNetwork must be public for framework consumers")
     if "guard let reachability = defaultRouteReachability" not in swift:
@@ -176,11 +207,8 @@ def main() -> int:
     if "flags.contains(.reachable)" not in swift:
         failures.append("reachability evaluation must derive connectivity from the Reachable flag")
 
-    tests = read("NetworkStateTests/NetworkStateTests.swift")
     if "import NetworkState" not in tests:
         failures.append("tests must import the framework module")
-    if "NetworkState.isConnectedToNetwork()" not in tests:
-        failures.append("tests must exercise the public connectivity API")
     if "testReachabilityFlagEvaluation" not in tests or "isReachableWithFlags" not in tests:
         failures.append("tests must cover reachability flag evaluation")
     if "testReachabilityFlagEvaluationAllowsAutomaticConnection" not in tests:
@@ -594,6 +622,18 @@ def main() -> int:
         or "hostile mutations rejected" not in assumptions_plan
     ):
         failures.append("platform assumptions plan must record completed verification")
+    snapshot_plan = read("docs/plans/2026-06-26-deterministic-snapshot-provider.md")
+    if "Status: Completed" not in snapshot_plan or "make check" not in snapshot_plan:
+        failures.append("deterministic snapshot provider plan must record completed verification")
+    documentation_contracts = {
+        "README.md": "unavailable snapshots fail closed",
+        "SECURITY.md": "Missing SystemConfiguration flag snapshots must fail closed",
+        "VISION.md": "snapshot acquisition failure",
+        "CHANGES.md": "Deterministic reachability snapshot coverage",
+    }
+    for relative_path, phrase in documentation_contracts.items():
+        if phrase not in read(relative_path):
+            failures.append(f"{relative_path} must document deterministic snapshot coverage")
     workflow_files = sorted(
         path.relative_to(ROOT).as_posix()
         for path in (ROOT / ".github/workflows").iterdir()

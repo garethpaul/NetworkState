@@ -25,6 +25,8 @@ This repository maintains a small Swift wrapper around legacy
 - Guard WWAN-only constants to iOS-family builds.
 - Describe results as local route reachability, never proof of internet or
   service availability.
+- Preserve deterministic nil/supplied snapshot tests; do not replace them with
+  tautological assertions against the host's live connectivity.
 
 ## Maintenance
 

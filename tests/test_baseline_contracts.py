@@ -60,5 +60,32 @@ class GitignoreContractTests(unittest.TestCase):
             )
 
 
+class ReachabilitySnapshotContractTests(unittest.TestCase):
+    def setUp(self):
+        self.swift = (ROOT / "NetworkState/NetworkState.swift").read_text(encoding="utf-8")
+        self.tests = (ROOT / "NetworkStateTests/NetworkStateTests.swift").read_text(encoding="utf-8")
+
+    def test_current_snapshot_contract_is_complete(self):
+        self.assertEqual(
+            [],
+            CHECK_BASELINE.reachability_snapshot_contract_errors(self.swift, self.tests),
+        )
+
+    def test_nil_snapshot_guard_is_required(self):
+        mutated = self.swift.replace("guard let flags = flagsProvider() else", "if let flags = flagsProvider()")
+        self.assertTrue(CHECK_BASELINE.reachability_snapshot_contract_errors(mutated, self.tests))
+
+    def test_shared_flag_evaluator_is_required(self):
+        mutated = self.swift.replace("return isReachableWithFlags(flags)", "return true", 1)
+        self.assertTrue(CHECK_BASELINE.reachability_snapshot_contract_errors(mutated, self.tests))
+
+    def test_tautological_live_network_assertion_is_rejected(self):
+        mutated_tests = self.tests + "\n// result || !result\n"
+        self.assertIn(
+            "tests must not use a tautological Boolean connectivity assertion",
+            CHECK_BASELINE.reachability_snapshot_contract_errors(self.swift, mutated_tests),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
